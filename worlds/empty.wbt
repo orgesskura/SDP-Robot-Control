@@ -1,0 +1,532 @@
+#VRML_SIM R2021a utf8
+WorldInfo {
+  gpsCoordinateSystem "WGS84"
+}
+Viewpoint {
+  orientation 0.17505715845035472 -0.3836843473571479 -0.9067200851797687 2.202181653039738
+  position -6.641319191104948 5.7542860721002365 10.471200002262497
+}
+DEF NORTH_POINTER Solid {
+  translation 0 12.23 0
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0 0
+        roughness 1
+        metalness 0
+      }
+      geometry Box {
+        size 0.3 1 0.1
+      }
+    }
+  ]
+}
+DEF RUBBISH Robot {
+  translation -0.09 1.32 0.48
+  children [
+    GPS {
+    }
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0 0
+        roughness 1
+        metalness 0
+      }
+      geometry Box {
+        size 0.1 0.1 0.1
+      }
+    }
+  ]
+  name "solid(1)"
+  controller "rubbish_controller"
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  rotation 1 0 0 1.5708
+  floorSize 25 25
+}
+DEF EdVarka Robot {
+  translation 2.03359 -1.74493 0.492168
+  rotation -0.025756808507240353 0.7323842418998757 0.6804042247313472 -3.0929753071795862
+  children [
+    DEF LEFT_PROP_W Solid {
+      translation -0.15 0.03 0.25
+      name "solid(7)"
+      physics Physics {
+        mass 0.1
+      }
+    }
+    DEF RIGHT_PROP_W Solid {
+      translation 0.15 0.03 0.25
+      name "solid(9)"
+      physics Physics {
+        mass 0.1
+      }
+    }
+    Compass {
+      rotation -0.9999999999999999 0 0 1.5707953071795862
+    }
+    GPS {
+    }
+    DEF CAP Solid {
+      translation -0.13 -0.06 -6.11772e-08
+      rotation 0.9999999999944944 2.3464099999870814e-06 -2.3464099999870814e-06 -1.5707953071795862
+      children [
+        DEF RIGHT_CAPS Shape {
+          appearance PBRAppearance {
+            baseColor 0 0 1
+            roughness 1
+            metalness 0
+            IBLStrength 100
+            normalMapFactor 14
+          }
+          geometry Capsule {
+            height 0.5
+            radius 0.04
+          }
+        }
+      ]
+      name "solid(1)"
+      immersionProperties [
+        ImmersionProperties {
+        }
+      ]
+      boundingObject USE RIGHT_CAPS
+      physics Physics {
+        density 28.8
+        damping Damping {
+          linear 1
+        }
+      }
+    }
+    DEF CAP Solid {
+      translation -5.82628e-07 -0.0599999 0.24
+      rotation 0.5773489358550934 0.5773519358547601 0.5773499358549823 -2.094395307179586
+      children [
+        DEF RIGHT_CAPS Shape {
+          appearance PBRAppearance {
+            baseColor 0 0 1
+            roughness 1
+            metalness 0
+            IBLStrength 100
+            normalMapFactor 14
+          }
+          geometry Capsule {
+            height 0.1
+            radius 0.04
+          }
+        }
+      ]
+      name "solid(8)"
+      immersionProperties [
+        ImmersionProperties {
+        }
+      ]
+      boundingObject USE RIGHT_CAPS
+      physics Physics {
+        density 28.8
+        damping Damping {
+          linear 1
+        }
+      }
+    }
+    DEF CAP Solid {
+      translation 0.13 -0.06 -6.11772e-08
+      rotation 0.9999999999944944 2.3464099999870814e-06 -2.3464099999870814e-06 -1.5707953071795862
+      children [
+        DEF LEFT_CAPS Shape {
+          appearance PBRAppearance {
+            baseColor 0 0 1
+            roughness 1
+            metalness 0
+            IBLStrength 100
+          }
+          geometry Capsule {
+            height 0.5
+            radius 0.04
+          }
+        }
+      ]
+      name "solid(2)"
+      immersionProperties [
+        ImmersionProperties {
+        }
+      ]
+      boundingObject USE LEFT_CAPS
+      physics Physics {
+        density 28.8
+        damping Damping {
+          linear 1
+        }
+      }
+    }
+    DEF BODY Solid {
+      children [
+        DEF BOX Shape {
+          appearance PBRAppearance {
+            baseColor 1 0 0
+            roughness 1
+            metalness 0
+          }
+          geometry Box {
+            size 0.3 0.05 0.5
+          }
+        }
+      ]
+      immersionProperties [
+        ImmersionProperties {
+        }
+      ]
+      boundingObject USE BOX
+      physics Physics {
+        mass 1.5
+      }
+    }
+    DEF BASE_ARM Solid {
+      translation 0.12 -5.0981e-08 -0.3
+      rotation 1 0 0 -1.5707953071795862
+      children [
+        DEF CYLINDER Shape {
+          appearance PBRAppearance {
+            baseColor 1 1 0
+            roughness 1
+            metalness 0
+          }
+          geometry Cylinder {
+            height 0.1
+            radius 0.02
+          }
+        }
+      ]
+      name "solid(3)"
+    }
+    DEF ARM HingeJoint {
+      jointParameters HingeJointParameters {
+      }
+      device [
+        RotationalMotor {
+        }
+      ]
+      endPoint Solid {
+        translation 0.074 0.00652281 -0.438777
+        rotation -0.5459369468314763 -0.41891295920227833 0.7255789293362342 1.6267253071795857
+        children [
+          Shape {
+            appearance PBRAppearance {
+              roughness 1
+              metalness 0
+            }
+            geometry Capsule {
+              height 0.17
+              radius 0.02
+            }
+          }
+        ]
+        name "solid(5)"
+      }
+    }
+    DEF BASE_ARM Solid {
+      translation -0.1 -5.0981e-08 -0.3
+      rotation 1 0 0 -1.5707953071795862
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 1 1 0
+            roughness 1
+            metalness 0
+          }
+          geometry Cylinder {
+            height 0.1
+            radius 0.02
+          }
+        }
+      ]
+      name "solid(4)"
+    }
+    DEF RIGHT_PROPELLER Propeller {
+      shaftAxis 0 0 -1
+      centerOfThrust 0.15 0.03 0
+      thrustConstants 0.04 0.04
+      torqueConstants 1e-07 1e-07
+      device RotationalMotor {
+        name "right_propeller_motor"
+        acceleration 2
+        maxVelocity 400
+        maxTorque 15
+      }
+      fastHelix DEF FAST_HELIX Solid {
+        translation 0.15 0.03 0.25
+        rotation 1 0 0 1.5708
+        children [
+          DEF FAST_MAIN_HELIX_SHAPE Shape {
+            appearance DEF FAST_HELIX_APPEARANCE PBRAppearance {
+              baseColorMap ImageTexture {
+                url [
+                  "textures/blurred_helix.png"
+                ]
+              }
+              transparency 0.5
+              roughness 0.5
+              metalness 0
+            }
+            geometry Cylinder {
+              height 0.003
+              radius 0.145
+              side FALSE
+              subdivision 24
+            }
+          }
+        ]
+        physics Physics {
+        }
+      }
+      slowHelix DEF SLOW_HELIX Solid {
+        translation 0.15 0.03 0.25000000000000006
+        rotation -0.07224724690862824 0.7052602318812283 0.7052576413205033 3.2858359995611606
+        children [
+          DEF SLOW_MAIN_HELIX_TRANSFORM Transform {
+            rotation 1 0 0 1.5708
+            children [
+              DEF SLOW_MAIN_HELIX_GROUP Group {
+                children [
+                  Shape {
+                    geometry Capsule {
+                      height 0.02
+                      radius 0.01
+                    }
+                  }
+                  Shape {
+                    geometry Cylinder {
+                      height 0.07
+                      radius 0.004
+                    }
+                  }
+                  DEF RIGHT_BLADE Transform {
+                    translation 0 0.09 0
+                    rotation 0 1 0 0.3618
+                    children [
+                      DEF BLADE_SHAPE Shape {
+                        appearance PBRAppearance {
+                          baseColor 0.8 0.8 0.8
+                          roughness 1
+                          metalness 0
+                        }
+                        geometry Box {
+                          size 0.01 0.11 0.004
+                        }
+                      }
+                    ]
+                  }
+                  DEF RIGHT_BLADE Transform {
+                    translation 0 -0.09 0
+                    rotation 0 1 0 -0.3618
+                    children [
+                      DEF BLADE_SHAPE Shape {
+                        appearance PBRAppearance {
+                          baseColor 0.8 0.8 0.8
+                          roughness 1
+                          metalness 0
+                        }
+                        geometry Box {
+                          size 0.01 0.11 0.004
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+        physics Physics {
+        }
+      }
+    }
+    DEF LEFT_PROPELLER Propeller {
+      shaftAxis 0 0 -1
+      centerOfThrust -0.15 0.03 0
+      thrustConstants 0.04 0.04
+      torqueConstants 1e-07 1e-07
+      device RotationalMotor {
+        name "left_propeller_motor"
+        acceleration 2
+        maxVelocity 400
+        maxTorque 15
+      }
+      fastHelix DEF FAST_HELIX Solid {
+        translation -0.15 0.03 0.25
+        rotation 1 0 0 1.5708
+        children [
+          DEF FAST_MAIN_HELIX_SHAPE Shape {
+            appearance DEF FAST_HELIX_APPEARANCE PBRAppearance {
+              baseColorMap ImageTexture {
+                url [
+                  "textures/blurred_helix.png"
+                ]
+              }
+              transparency 0.5
+              roughness 0.5
+              metalness 0
+            }
+            geometry Cylinder {
+              height 0.003
+              radius 0.145
+              side FALSE
+              subdivision 24
+            }
+          }
+        ]
+        physics Physics {
+        }
+      }
+      slowHelix DEF SLOW_HELIX Solid {
+        translation -0.15 0.03 0.24999999999999997
+        rotation 0.9370582893263215 0.2469030277745369 0.2469021208507409 1.63576403927481
+        children [
+          DEF SLOW_MAIN_HELIX_TRANSFORM Transform {
+            rotation 1 0 0 1.5708
+            children [
+              DEF SLOW_MAIN_HELIX_GROUP Group {
+                children [
+                  Shape {
+                    geometry Capsule {
+                      height 0.02
+                      radius 0.01
+                    }
+                  }
+                  Shape {
+                    geometry Cylinder {
+                      height 0.07
+                      radius 0.004
+                    }
+                  }
+                  DEF RIGHT_BLADE Transform {
+                    translation 0 0.09 0
+                    rotation 0 1 0 0.3618
+                    children [
+                      DEF BLADE_SHAPE Shape {
+                        appearance PBRAppearance {
+                          baseColor 0.8 0.8 0.8
+                          roughness 1
+                          metalness 0
+                        }
+                        geometry Box {
+                          size 0.01 0.11 0.004
+                        }
+                      }
+                    ]
+                  }
+                  DEF RIGHT_BLADE Transform {
+                    translation 0 -0.09 0
+                    rotation 0 1 0 -0.3618
+                    children [
+                      DEF BLADE_SHAPE Shape {
+                        appearance PBRAppearance {
+                          baseColor 0.8 0.8 0.8
+                          roughness 1
+                          metalness 0
+                        }
+                        geometry Box {
+                          size 0.01 0.11 0.004
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+        physics Physics {
+        }
+      }
+    }
+    DEF ARM HingeJoint {
+      jointParameters HingeJointParameters {
+      }
+      device [
+        RotationalMotor {
+        }
+      ]
+      endPoint Solid {
+        translation -0.0952797 0.00563939 -0.446685
+        rotation -0.8564743399428695 -0.4357641729589743 0.2766971098237333 1.65616
+        children [
+          Shape {
+            appearance PBRAppearance {
+              roughness 1
+              metalness 0
+            }
+            geometry Capsule {
+              height 0.17
+              radius 0.02
+            }
+          }
+        ]
+        name "solid(6)"
+      }
+    }
+  ]
+  immersionProperties [
+    ImmersionProperties {
+      fluidName "swimming pool"
+    }
+  ]
+  boundingObject USE BOX
+  physics Physics {
+    mass 2
+    damping Damping {
+      linear 1
+      angular 0.6
+    }
+  }
+  controller "main_controller"
+}
+DEF SWIMMING_POOL SolidPipe {
+  translation 0 0 0.25
+  rotation 1 0 0 1.5708
+  height 0.5
+  radius 12
+  appearance DEF DARK_BROWN PBRAppearance {
+    baseColor 0.501961 0.337255 0.2
+    roughness 1.1102230246251565e-16
+    metalness 0
+  }
+}
+DEF STILL_WATER Fluid {
+  translation 0 0 0.25
+  rotation 1 0 0 1.5708
+  children [
+    DEF S Shape {
+      appearance DEF WATER_APPEARANCE PBRAppearance {
+        baseColor 0 0.501961 1
+        transparency 0.5
+        roughness 1.1102230246251565e-16
+        metalness 0
+      }
+      geometry Cylinder {
+        height 0.4
+        radius 11.9
+        subdivision 24
+      }
+    }
+  ]
+  name "swimming pool"
+  boundingObject USE S
+}
+DEF SWIMMING_POOL_BOTTOM Transform {
+  rotation 1 0 0 1.5708
+  children [
+    Shape {
+      appearance USE DARK_BROWN
+      geometry Cylinder {
+        height 0.02
+        radius 12
+        subdivision 24
+      }
+    }
+  ]
+}

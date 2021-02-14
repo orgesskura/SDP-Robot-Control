@@ -1,0 +1,48 @@
+-- robot_movement
+
+goto_long_lat(position)
+- robot turns towards target position (face(long, lat))
+- robot moves (move_towards(long, lat))
+- should only be used for small distances, after checking for obstacles. (Maybe return error/do nothing if distance is too large)
+- uses get_distance_between
+
+is_facing(position)
+- gets angle to target using get_angle_to_target
+- has an acceptable range of error for facing angle.
+- returns true if angle to target is acceptably small.
+
+get_angle_to_target(target_position)
+- uses compass and gps (or other self-location methods) in order to determine the angle the robot has to turn to face the target position.
+
+face(position)
+- gets angle to target using get_angle_to_target
+- utilizes propellers in order to face the target
+- constant multiplier for easy adjustment of propeller velocity
+- formula that gives velocity for each propeller based on angle difference
+
+is_in_proximity(position)
+- returns true if the target position is within a certain distance
+- uses get_distance_between
+
+move_towards(position)
+- only does something if is_facing(position) is true
+- constant multiplier for easy adjustment of propeller velocity (probably different than face, and maybe different for accelerating and decelerating?)
+- sets propeller speed to positive constant if target is not in proximity, negative if is in proximity
+- (extension?) function that controls speed based on distance from target
+
+
+--- utils
+
+class position
+- long
+- lat
+
+get_angle_between(position1, position2)
+- returns the small angle between the two positions
+
+get_distance_between(position1, position 2)
+- return euclidean distance in meters 
+
+
+IMPROVEMENTS:
+robot_movement.get_angle_to_target sometimes returns the large angle to turn instead of the small one (when angle is ~π)
