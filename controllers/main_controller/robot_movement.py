@@ -7,18 +7,19 @@ class robot_movement:
         # constants
         self.FACING_THRESHOLD = math.radians(5)
         self.DISTANCE_THRESHOLD = 0.5 # meter(s)
+        self.MAX_ROT_V = 0.6
         # PΙD controller for facing
         self.INCLUDE_I_TERM_THRESHOLD_F = math.radians(12)
         self.last_f_error = 0
-        self.f_Kp = 2.5
+        self.f_Kp = 0.9
         self.f_Kd = 1000
-        self.f_Ki = 0.3
+        self.f_Ki = 0.2
         # PID controller for travelling
-        self.INCLUDE_I_TERM_THRESHOLD_T = 0.4
+        self.INCLUDE_I_TERM_THRESHOLD_T = 0.5
         self.last_t_error = 0
-        self.t_Kp = 3
-        self.t_Kd = 4
-        self.t_Ki = 0.3
+        self.t_Kp = 0.5
+        self.t_Kd = 1000
+        self.t_Ki = 0
 
     def get_angle_to_target(self, target_position):
         own_azimuth = self.hi.get_compass_reading()
@@ -72,6 +73,8 @@ class robot_movement:
         if abs(error) < self.INCLUDE_I_TERM_THRESHOLD_T:
             include_i_term = 1
         rotation_velocity = (self.t_Kp*error + self.t_Kd*error_derivative + include_i_term*self.t_Ki*error_integral)
+        if abs(rotation_velocity) > self.MAX_ROT_V:
+            rotation_velocity = rotation_velocity/abs(rotation_velocity) * self.MAX_ROT_V
         self.hi.set_right_propeller_velocity(rotation_velocity)
         self.hi.set_left_propeller_velocity(rotation_velocity)
     
