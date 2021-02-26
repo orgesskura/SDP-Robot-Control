@@ -14,6 +14,9 @@ class hardware_interface:
         self.right_propeller = self.robot.getDevice("right_propeller_motor")
         self.set_left_propeller_position(float('+inf'))
         self.set_right_propeller_position(float('+inf'))
+        self.left_arm = self.robot.getDevice("left_arm_motor")
+        self.right_arm = self.robot.getDevice("right_arm_motor")
+
 
     def enable_devices(self):
         self.gps.enable(self.timestep)
@@ -61,4 +64,8 @@ class hardware_interface:
 
     def set_propeller_acceleration(self, propeller, a):
         propeller.setAcceleration(a)
+
+    def set_arms_position(self, p):
+        self.left_arm.setPosition(p)
+        self.right_arm.setPosition(p)
 

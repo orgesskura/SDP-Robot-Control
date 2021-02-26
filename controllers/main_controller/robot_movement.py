@@ -5,21 +5,23 @@ class robot_movement:
     def __init__(self, hardware_interface):
         self.hi = hardware_interface
         # constants
-        self.FACING_THRESHOLD = math.radians(5)
+        self.FACING_THRESHOLD = math.radians(10)
         self.DISTANCE_THRESHOLD = 0.5 # meter(s)
-        self.MAX_ROT_V = 0.6
+        self.MAX_ROT_V = 2
+        self.ARMS_OPEN = 0
+        self.ARMS_CLOSED = 1.5
         # PΙD controller for facing
         self.INCLUDE_I_TERM_THRESHOLD_F = math.radians(12)
         self.last_f_error = 0
-        self.f_Kp = 0.9
-        self.f_Kd = 1000
+        self.f_Kp = 2
+        self.f_Kd = 800
         self.f_Ki = 0.2
         # PID controller for travelling
         self.INCLUDE_I_TERM_THRESHOLD_T = 0.5
         self.last_t_error = 0
-        self.t_Kp = 0.5
-        self.t_Kd = 1000
-        self.t_Ki = 0
+        self.t_Kp = 1
+        self.t_Kd = 500
+        self.t_Ki = 0.2
 
     def get_angle_to_target(self, target_position):
         own_azimuth = self.hi.get_compass_reading()
@@ -59,7 +61,7 @@ class robot_movement:
 
     def is_in_proximity(self, target_position):
         dist = self.get_distance_to_target(target_position)
-        return dist < self.DISTANCE_THRESHOLD
+        return dist < self.DISTANCE_THRESHOLD+0.2
     
     def move_towards(self, target_position):
         if not self.is_facing(target_position):
@@ -88,5 +90,11 @@ class robot_movement:
                 self.hi.robot.step(self.hi.timestep)
         else:
             self.move_towards(target_position)
+        
+    def open_arms(self):
+        self.hi.set_arms_position(self.ARMS_OPEN)
+    
+    def close_arms(self):
+        self.hi.set_arms_position(self.ARMS_CLOSED)
         
 

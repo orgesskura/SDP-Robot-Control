@@ -41,7 +41,8 @@ while robot.step(timestep) != -1:
     rubbish_pos = utils.position(tmp[1], tmp[0])
     print("Angle to turn: {}".format(rm.get_angle_to_target(rubbish_pos)))
     print("Distance to target: {}".format(rm.get_distance_to_target(rubbish_pos)))
-    #rm.face(rubbish_pos)
+    if rm.is_in_proximity(rubbish_pos):
+        rm.open_arms()
+    else:
+        rm.close_arms()
     rm.goto_long_lat(rubbish_pos)
-    #hi.set_left_propeller_velocity(1)
-    #hi.set_right_propeller_velocity(2)
