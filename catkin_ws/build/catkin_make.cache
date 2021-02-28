@@ -1,0 +1,2 @@
+edvarka:robot_localization
+-DCATKIN_DEVEL_PREFIX=/home/tsioftas/Uni/Y3/SDP/SDP-Robot-Control/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/tsioftas/Uni/Y3/SDP/SDP-Robot-Control/catkin_ws/install -G Unix Makefiles

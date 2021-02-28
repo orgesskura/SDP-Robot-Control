@@ -1,0 +1,8 @@
+prefix=/home/tsioftas/Uni/Y3/SDP/SDP-Robot-Control/catkin_ws/install
+
+Name: edvarka
+Description: Description of edvarka
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

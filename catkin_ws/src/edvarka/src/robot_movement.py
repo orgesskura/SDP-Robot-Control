@@ -1,0 +1,113 @@
+import utils
+import math
+
+class robot_movement:
+    def __init__(self, hardware_interface):
+        self.hi = hardware_interface
+        # constants
+        self.MAX_FACING_THRESHOLD = math.radians(20)
+        self.MIN_FACING_THRESHOLD = math.radians(5)
+        self.FACING_THRESHOLD = math.radians(10)
+        self.DISTANCE_THRESHOLD = 0.1 # meter(s)
+        self.ARMS_OPEN_DISTANCE = 1
+        self.MAX_ROT_V = 2
+        self.ARMS_OPEN = 0
+        self.ARMS_CLOSED = 1.5
+        # PΙD controller for facing
+        self.INCLUDE_I_TERM_THRESHOLD_F = math.radians(20)
+        self.last_f_error = 0
+        self.f_Kp = 2
+        self.f_Kd = 800
+        self.f_Ki = 0.2
+        # PID controller for travelling
+        self.INCLUDE_I_TERM_THRESHOLD_T = 0.7
+        self.last_t_error = 0
+        self.t_Kp = 1
+        self.t_Kd = 500
+        self.t_Ki = 0.4
+
+    def get_angle_to_target(self, target_position):
+        own_azimuth = self.hi.get_compass_reading()
+        gps_reading = self.hi.get_gps_values()
+        own_position = utils.position(gps_reading[1], gps_reading[0])
+        print("Boat coords: ", gps_reading[1], gps_reading[0])
+        azimuth_to_target = utils.get_angle_between(own_position, target_position)
+        ret = azimuth_to_target - own_azimuth
+        if abs(ret) > math.pi:
+            if ret < 0:
+                ret += 2*math.pi
+            else:
+                ret -= 2*math.pi
+        return ret
+    
+    def is_facing(self, target_position):
+        angle_to_target = self.get_angle_to_target(target_position)
+        # distance_to_target = self.get_distance_to_target(target_position)
+        # self.FACING_THRESHOLD = 1.6667 * distance_to_target + 3.3333
+        # if self.FACING_THRESHOLD > self.MAX_FACING_THRESHOLD:
+        #     self.FACING_THRESHOLD = self.MAX_FACING_THRESHOLD
+        # if self.FACING_THRESHOLD < self.MIN_FACING_THRESHOLD:
+        #     self.FACING_THRESHOLD = self.MIN_FACING_THRESHOLD
+        return abs(angle_to_target) < self.FACING_THRESHOLD
+    
+    def face(self, target_position):
+        error = self.get_angle_to_target(target_position)
+        error_derivative = (error - self.last_f_error) / self.hi.timestep
+        self.last_f_error = error
+        error_integral = error * self.hi.timestep
+        include_i_term = 0
+        if abs(error) < self.INCLUDE_I_TERM_THRESHOLD_F:
+            include_i_term = 1
+        rotation_velocity = (self.f_Kp*error + self.f_Kd*error_derivative + include_i_term*self.f_Ki*error_integral)
+        self.hi.set_left_propeller_velocity(rotation_velocity)
+        self.hi.set_right_propeller_velocity(-rotation_velocity)
+    
+    def get_distance_to_target(self, target_position):
+        gps_reading = self.hi.get_gps_values()
+        own_position = utils.position(gps_reading[1], gps_reading[0])
+        print("Boat coords: {}".format(own_position.longitude,own_position.latitude))
+        return utils.get_distance_between(own_position, target_position)
+
+    def is_in_proximity(self, target_position):
+        dist = self.get_distance_to_target(target_position)
+        return dist < self.ARMS_OPEN_DISTANCE
+    
+    def is_at(self, target_position):
+        dist = self.get_distance_to_target(target_position)
+        return dist < self.DISTANCE_THRESHOLD
+    
+    def move_towards(self, target_position):
+        if not self.is_facing(target_position):
+            self.face(target_position)
+            return
+        error = self.get_distance_to_target(target_position) - self.DISTANCE_THRESHOLD
+        error_derivative = (error - self.last_t_error) / self.hi.timestep
+        self.last_t_error = error
+        error_integral = error * self.hi.timestep
+        include_i_term = 0
+        if abs(error) < self.INCLUDE_I_TERM_THRESHOLD_T:
+            include_i_term = 1
+        rotation_velocity = (self.t_Kp*error + self.t_Kd*error_derivative + include_i_term*self.t_Ki*error_integral)
+        if abs(rotation_velocity) > self.MAX_ROT_V:
+            rotation_velocity = rotation_velocity/abs(rotation_velocity) * self.MAX_ROT_V
+        self.hi.set_right_propeller_velocity(rotation_velocity)
+        self.hi.set_left_propeller_velocity(rotation_velocity)
+    
+    def goto_long_lat(self, target_position):
+        if not self.is_facing(target_position):
+            self.face(target_position)
+        elif not self.hi.propellers_have_same_velocity():
+            self.hi.set_left_propeller_velocity(0)
+            self.hi.set_right_propeller_velocity(0)
+            for i in range(15):
+                self.hi.robot.step(self.hi.timestep)
+        else:
+            self.move_towards(target_position)
+        
+    def open_arms(self):
+        self.hi.set_arms_position(self.ARMS_OPEN)
+    
+    def close_arms(self):
+        self.hi.set_arms_position(self.ARMS_CLOSED)
+        
+

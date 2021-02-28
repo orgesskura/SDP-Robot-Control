@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- start Webots -->
+  <arg name="no_gui" default="false," doc="Start Webots with minimal GUI"/>
+  <include file="$(find edvarka)/launch/webots.launch">
+    <arg name="mode" value="realtime"/>
+    <arg name="no_gui" value="$(arg no_gui)"/>
+    <arg name="world" value="$(find edvarka)/worlds/edvarka.wbt"/>
+  </include>
+
+  <arg name="auto_close" default="false" doc="Startup mode"/>
+  <node name="main_controller" pkg="edvarka" type="main_controller.py" required="$(arg auto_close)" output="screen"/>
+  
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_node" clear_params="true">
+    <rosparam command="load" file="$(find robot_localization)/params/map_frame_node_params.yaml" />
+    <remap from="odometry/filtered" to="odom_prediction"/>
+    <remap from="accel/filtered" to="accel_prediction"/>
+  </node>
+
+  <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true">
+
+    <param name="magnetic_declination_radians" value="0"/>
+
+    <param name="yaw_offset" value="0"/>
+
+    <param name="zero_altitude" value="true"/>
+
+    <param name="broadcast_cartesian_transform" value="true"/>
+    <param name="publish_filtered_gps" value="true"/>
+
+    <remap from="/imu/data" to="/imu0_topic" />
+    <remap from="/gps/fix" to="/gps_topic" />
+    <remap from="/odometry/filtered" to="/odom_prediction" />
+    <remap from="/odometry/gps" to="/odom_gps" />
+
+  </node>
+
+</launch>
