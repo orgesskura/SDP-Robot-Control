@@ -52,20 +52,20 @@ class main_controller:
         rubbish_pos = utils.position(tmp[1], tmp[0])
         print("Angle to turn: {}".format(self.rm.get_angle_to_target(rubbish_pos)))
         print("Distance to target: {}".format(self.rm.get_distance_to_target(rubbish_pos)))
-        # self.hi.set_left_propeller_velocity(0)
-        # self.hi.set_right_propeller_velocity(0)
-        if self.rm.is_in_proximity(rubbish_pos):
-            self.rm.open_arms()
-        else:
-            self.rm.close_arms()
-        self.rm.goto_long_lat(rubbish_pos)
+        self.hi.set_left_propeller_velocity(0.5)
+        self.hi.set_right_propeller_velocity(0.5)
+        # if self.rm.is_in_proximity(rubbish_pos):
+        #     self.rm.open_arms()
+        # else:
+        #     self.rm.close_arms()
+        # self.rm.goto_long_lat(rubbish_pos)
         self.send_sensor_readings_to_localization()
         self.robot.step(self.timestep)
 
 
     def send_sensor_readings_to_localization(self):
         y_axis_linear_acc = self.hi.get_accelerometer_reading()[1] # only interested in y axis acceleration
-        y_axis_linear_acc -= self.accelerometer_y_bias
+        # y_axis_linear_acc -= self.accelerometer_y_bias
         z_axis_angular_vel = self.hi.get_gyro_reading()[2] # only interested in z axis angular velocity
 
         self.msg_seq += 1
@@ -86,7 +86,7 @@ class main_controller:
         av.z = z_axis_angular_vel
         imu_msg.angular_velocity = av
         avc = [0 for i in range(9)]
-        avc[8] = 1
+        avc[8] = 0.00069
         imu_msg.angular_velocity_covariance = avc # TODO: FIX THIS
         # linear acceleration
         la = Vector3()
@@ -94,19 +94,20 @@ class main_controller:
         la.y = y_axis_linear_acc
         la.z = 0
         imu_msg.linear_acceleration = la
-        lac = [1e-9 for i in range(9)]
-        lac[4] = 1
+        lac = [0 for i in range(9)]
+        lac[4] = 0.00069
         imu_msg.linear_acceleration_covariance = lac # TODO: AND THIS
         self.imu0_pub.publish(imu_msg)
 
         compass_reading = self.hi.get_compass_reading()
-        # format compass_reading to be the counter-clockwise angle from north
+        # format compass_reading to be the counter-clockwise angle from east
         if compass_reading > 0:
             compass_reading -= 2*math.pi
         compass_reading *= -1
         compass_reading += math.pi/2
         if compass_reading >= 2*math.pi:
             compass_reading -= 2*math.pi
+        print("COmpass: {}".format(compass_reading))
         comp_msg = PoseWithCovarianceStamped()
         comp_msg.header.stamp = rospy.Time.now()
         comp_msg.header.seq = self.msg_seq
@@ -116,9 +117,9 @@ class main_controller:
         comp_msg.pose.pose.orientation.y = quat[1]
         comp_msg.pose.pose.orientation.z = quat[2]
         comp_msg.pose.pose.orientation.w = quat[3]
-        comp_cov = [1e-9 for i in range(36)] # TODO: and this...
+        comp_cov = [0 for i in range(36)] # TODO: and this...
         for i in [0,7,14,21,28,35]:
-            comp_cov[i] = 1e-9
+            comp_cov[i] = 0.00069
         comp_msg.pose.covariance = comp_cov
         self.compass_pub.publish(comp_msg)
 
@@ -142,54 +143,56 @@ class main_controller:
 
 if __name__ == "__main__":
     mc = main_controller()
-    # move towards box
-    tmp = [7.1375163565142205e-06, -2.5756252302227544e-05]
-    rubbish_pos = utils.position(tmp[1], tmp[0])
-    while not mc.rm.is_at(rubbish_pos) and not rospy.is_shutdown():
-        cr = mc.hi.get_compass_reading()
-        gr = mc.hi.get_gps_values()
-        print("Angle to turn: {}".format(mc.rm.get_angle_to_target(rubbish_pos)))
-        print("Distance to target: {}".format(mc.rm.get_distance_to_target(rubbish_pos)))
-        if mc.rm.is_in_proximity(rubbish_pos):
-            mc.rm.open_arms()
-        else:
-            mc.rm.close_arms()
-        mc.rm.goto_long_lat(rubbish_pos)
-        mc.send_sensor_readings_to_localization()
-        mc.robot.step(mc.timestep)
-    # move towards bottle
-    tmp = [2.1141504335055434e-05, -1.5974212838350998e-05]
-    rubbish_pos = utils.position(tmp[1], tmp[0])
-    while not mc.rm.is_at(rubbish_pos) and not rospy.is_shutdown():
-        cr = mc.hi.get_compass_reading()
-        gr = mc.hi.get_gps_values()
-        print("Angle to turn: {}".format(mc.rm.get_angle_to_target(rubbish_pos)))
-        print("Distance to target: {}".format(mc.rm.get_distance_to_target(rubbish_pos)))
-        if mc.rm.is_in_proximity(rubbish_pos):
-            mc.rm.open_arms()
-        else:
-            mc.rm.close_arms()
-        mc.rm.goto_long_lat(rubbish_pos)
-        mc.send_sensor_readings_to_localization()
-        mc.robot.step(mc.timestep)
-    # move towards sphere
-    tmp = [2.6291356923053307e-05, -5.860236671450979e-05]
-    rubbish_pos = utils.position(tmp[1], tmp[0])
-    while not mc.rm.is_at(rubbish_pos) and not rospy.is_shutdown():
-        cr = mc.hi.get_compass_reading()
-        gr = mc.hi.get_gps_values()
-        print("Angle to turn: {}".format(mc.rm.get_angle_to_target(rubbish_pos)))
-        print("Distance to target: {}".format(mc.rm.get_distance_to_target(rubbish_pos)))
-        if mc.rm.is_in_proximity(rubbish_pos):
-            mc.rm.open_arms()
-        else:
-            mc.rm.close_arms()
-        mc.rm.goto_long_lat(rubbish_pos)
-        mc.send_sensor_readings_to_localization()
-        mc.robot.step(mc.timestep)
-    # finished collection
     while not rospy.is_shutdown():
-        mc.rm.close_arms()
-        mc.hi.set_left_propeller_velocity(1)
-        mc.hi.set_right_propeller_velocity(1)
-        mc.robot.step(mc.timestep)
+        mc.main_loop()
+    # move towards box
+    # tmp = [7.1375163565142205e-06, -2.5756252302227544e-05]
+    # rubbish_pos = utils.position(tmp[1], tmp[0])
+    # while not mc.rm.is_at(rubbish_pos) and not rospy.is_shutdown():
+    #     cr = mc.hi.get_compass_reading()
+    #     gr = mc.hi.get_gps_values()
+    #     print("Angle to turn: {}".format(mc.rm.get_angle_to_target(rubbish_pos)))
+    #     print("Distance to target: {}".format(mc.rm.get_distance_to_target(rubbish_pos)))
+    #     if mc.rm.is_in_proximity(rubbish_pos):
+    #         mc.rm.open_arms()
+    #     else:
+    #         mc.rm.close_arms()
+    #     mc.rm.goto_long_lat(rubbish_pos)
+    #     mc.send_sensor_readings_to_localization()
+    #     mc.robot.step(mc.timestep)
+    # # move towards bottle
+    # tmp = [2.1141504335055434e-05, -1.5974212838350998e-05]
+    # rubbish_pos = utils.position(tmp[1], tmp[0])
+    # while not mc.rm.is_at(rubbish_pos) and not rospy.is_shutdown():
+    #     cr = mc.hi.get_compass_reading()
+    #     gr = mc.hi.get_gps_values()
+    #     print("Angle to turn: {}".format(mc.rm.get_angle_to_target(rubbish_pos)))
+    #     print("Distance to target: {}".format(mc.rm.get_distance_to_target(rubbish_pos)))
+    #     if mc.rm.is_in_proximity(rubbish_pos):
+    #         mc.rm.open_arms()
+    #     else:
+    #         mc.rm.close_arms()
+    #     mc.rm.goto_long_lat(rubbish_pos)
+    #     mc.send_sensor_readings_to_localization()
+    #     mc.robot.step(mc.timestep)
+    # # move towards sphere
+    # tmp = [2.6291356923053307e-05, -5.860236671450979e-05]
+    # rubbish_pos = utils.position(tmp[1], tmp[0])
+    # while not mc.rm.is_at(rubbish_pos) and not rospy.is_shutdown():
+    #     cr = mc.hi.get_compass_reading()
+    #     gr = mc.hi.get_gps_values()
+    #     print("Angle to turn: {}".format(mc.rm.get_angle_to_target(rubbish_pos)))
+    #     print("Distance to target: {}".format(mc.rm.get_distance_to_target(rubbish_pos)))
+    #     if mc.rm.is_in_proximity(rubbish_pos):
+    #         mc.rm.open_arms()
+    #     else:
+    #         mc.rm.close_arms()
+    #     mc.rm.goto_long_lat(rubbish_pos)
+    #     mc.send_sensor_readings_to_localization()
+    #     mc.robot.step(mc.timestep)
+    # # finished collection
+    # while not rospy.is_shutdown():
+    #     mc.rm.close_arms()
+    #     mc.hi.set_left_propeller_velocity(1)
+    #     mc.hi.set_right_propeller_velocity(1)
+    #     mc.robot.step(mc.timestep)

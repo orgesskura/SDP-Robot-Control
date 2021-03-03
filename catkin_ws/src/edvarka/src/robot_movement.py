@@ -6,7 +6,7 @@ class robot_movement:
         self.hi = hardware_interface
         # constants
         self.MAX_FACING_THRESHOLD = math.radians(20)
-        self.MIN_FACING_THRESHOLD = math.radians(5)
+        self.MIN_FACING_THRESHOLD = math.radians(10)
         self.FACING_THRESHOLD = math.radians(10)
         self.DISTANCE_THRESHOLD = 0.1 # meter(s)
         self.ARMS_OPEN_DISTANCE = 1
@@ -42,12 +42,12 @@ class robot_movement:
     
     def is_facing(self, target_position):
         angle_to_target = self.get_angle_to_target(target_position)
-        # distance_to_target = self.get_distance_to_target(target_position)
-        # self.FACING_THRESHOLD = 1.6667 * distance_to_target + 3.3333
-        # if self.FACING_THRESHOLD > self.MAX_FACING_THRESHOLD:
-        #     self.FACING_THRESHOLD = self.MAX_FACING_THRESHOLD
-        # if self.FACING_THRESHOLD < self.MIN_FACING_THRESHOLD:
-        #     self.FACING_THRESHOLD = self.MIN_FACING_THRESHOLD
+        distance_to_target = self.get_distance_to_target(target_position)
+        self.FACING_THRESHOLD = -1.6667 * distance_to_target + 21.6667
+        if self.FACING_THRESHOLD > self.MAX_FACING_THRESHOLD:
+            self.FACING_THRESHOLD = self.MAX_FACING_THRESHOLD
+        if self.FACING_THRESHOLD < self.MIN_FACING_THRESHOLD:
+            self.FACING_THRESHOLD = self.MIN_FACING_THRESHOLD
         return abs(angle_to_target) < self.FACING_THRESHOLD
     
     def face(self, target_position):
