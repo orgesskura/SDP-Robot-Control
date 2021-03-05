@@ -23,6 +23,7 @@ class main_controller:
         # more ros stuff
         self.msg_seq = 0
         self.imu0_pub = rospy.Publisher("imu0_topic", Imu, queue_size=5)
+        self.imu_global_pub = rospy.Publisher("imu_global", Imu, queue_size=5)
         self.compass_pub = rospy.Publisher("compass_topic", PoseWithCovarianceStamped, queue_size=5)
         self.gps_pub = rospy.Publisher("gps_topic", NavSatFix, queue_size=5)
 
@@ -43,6 +44,7 @@ class main_controller:
 
         # setup stuff
         self.accelerometer_y_bias = -0.3
+        self.initial_global_yaw = -100
     
 
     def main_loop(self):
@@ -64,21 +66,35 @@ class main_controller:
 
 
     def send_sensor_readings_to_localization(self):
-        y_axis_linear_acc = self.hi.get_accelerometer_reading()[1] # only interested in y axis acceleration
-        # y_axis_linear_acc -= self.accelerometer_y_bias
         z_axis_angular_vel = self.hi.get_gyro_reading()[2] # only interested in z axis angular velocity
+        # get global and local yaw values
+        global_yaw = self.hi.get_imu_reading()[0] + math.pi
+        if global_yaw > math.pi:
+            global_yaw -= math.pi*2
+        if self.initial_global_yaw == -100:
+            self.initial_global_yaw = global_yaw
+        local_yaw = global_yaw - self.initial_global_yaw
+        # get acceleration values
+        linear_acc = self.hi.get_accelerometer_reading() # accelerometer reading with gravitational acceleration bias
+        roll = self.hi.get_imu_reading()[1]
+        g = 9.80665
+        y_axis_linear_acc = (linear_acc[1] + g*math.sin(roll))*math.cos(roll) # remove gravitational acc. component, then project to axis parallel to ground
 
+        # construct local-frame imu message
         self.msg_seq += 1
         imu_msg = Imu()
         # header
         imu_msg.header.stamp = rospy.Time.now()
         imu_msg.header.seq = self.msg_seq
         imu_msg.header.frame_id = "base_link"
-        # quaternion - not measured
-        imu_msg.orientation.x = 1
-        imu_msg.orientation.y = 0
-        imu_msg.orientation.z = 0
-        imu_msg.orientation_covariance = [-1 for i in range(9)]
+        # quaternion
+        quat = tf.transformations.quaternion_from_euler(0, 0, local_yaw)
+        imu_msg.orientation.x = quat[0]
+        imu_msg.orientation.y = quat[1]
+        imu_msg.orientation.z = quat[2]
+        imu_msg.orientation.w = quat[3]
+        imu_msg.orientation_covariance = [0 for i in range(9)]
+        imu_msg.orientation_covariance[8] = 0.0001
         # angular velocity
         av = Vector3()
         av.x = 0
@@ -86,7 +102,7 @@ class main_controller:
         av.z = z_axis_angular_vel
         imu_msg.angular_velocity = av
         avc = [0 for i in range(9)]
-        avc[8] = 0.00069
+        avc[8] = 0.0001
         imu_msg.angular_velocity_covariance = avc # TODO: FIX THIS
         # linear acceleration
         la = Vector3()
@@ -95,9 +111,44 @@ class main_controller:
         la.z = 0
         imu_msg.linear_acceleration = la
         lac = [0 for i in range(9)]
-        lac[4] = 0.00069
+        lac[4] = 1
         imu_msg.linear_acceleration_covariance = lac # TODO: AND THIS
         self.imu0_pub.publish(imu_msg)
+
+        # construct global-frame imu message
+        imu_msg_global = Imu()
+        # header
+        imu_msg_global.header.stamp = rospy.Time.now()
+        imu_msg_global.header.seq = self.msg_seq
+        imu_msg_global.header.frame_id = "map"
+        # quaternion
+        quat = tf.transformations.quaternion_from_euler(0, 0, global_yaw)
+        imu_msg_global.orientation.x = quat[0]
+        imu_msg_global.orientation.y = quat[1]
+        imu_msg_global.orientation.z = quat[2]
+        imu_msg_global.orientation.w = quat[3]
+        imu_msg_global.orientation_covariance = [0 for i in range(9)]
+        imu_msg_global.orientation_covariance[8] = 0.0001
+        # angular velocity
+        av = Vector3()
+        av.x = 0
+        av.y = 0
+        av.z = z_axis_angular_vel
+        imu_msg_global.angular_velocity = av
+        avc = [0 for i in range(9)]
+        avc[8] = 0.0001
+        imu_msg_global.angular_velocity_covariance = avc # TODO: FIX THIS
+        # linear acceleration
+        la = Vector3()
+        la.x = math.cos(global_yaw)*y_axis_linear_acc
+        la.y = math.sin(global_yaw)*y_axis_linear_acc
+        la.z = 0
+        imu_msg_global.linear_acceleration = la
+        lac = [0 for i in range(9)]
+        lac[0] = 1
+        lac[4] = 1
+        imu_msg_global.linear_acceleration_covariance = lac # TODO: AND THIS
+        self.imu_global_pub.publish(imu_msg_global)
 
         compass_reading = self.hi.get_compass_reading()
         # format compass_reading to be the counter-clockwise angle from east
@@ -107,7 +158,7 @@ class main_controller:
         compass_reading += math.pi/2
         if compass_reading >= 2*math.pi:
             compass_reading -= 2*math.pi
-        print("COmpass: {}".format(compass_reading))
+        print("Compass: {}".format(compass_reading))
         comp_msg = PoseWithCovarianceStamped()
         comp_msg.header.stamp = rospy.Time.now()
         comp_msg.header.seq = self.msg_seq
@@ -119,7 +170,7 @@ class main_controller:
         comp_msg.pose.pose.orientation.w = quat[3]
         comp_cov = [0 for i in range(36)] # TODO: and this...
         for i in [0,7,14,21,28,35]:
-            comp_cov[i] = 0.00069
+            comp_cov[i] = 0.0001
         comp_msg.pose.covariance = comp_cov
         self.compass_pub.publish(comp_msg)
 
@@ -134,7 +185,7 @@ class main_controller:
         pos_cov[0] = 1e-9
         pos_cov[4] = 1e-9
         gps_msg.position_covariance = pos_cov
-        gps_msg.position_covariance_type = NavSatFix.COVARIANCE_TYPE_APPROXIMATED # TODO: change?
+        gps_msg.position_covariance_type = NavSatFix.COVARIANCE_TYPE_KNOWN # TODO: change?
         self.gps_pub.publish(gps_msg)
 
 

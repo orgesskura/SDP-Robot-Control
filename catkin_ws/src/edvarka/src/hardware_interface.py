@@ -14,6 +14,7 @@ class hardware_interface:
         self.gps = self.robot.getDevice("gps")
         self.accelerometer = self.robot.getDevice("accelerometer")
         self.gyro = self.robot.getDevice("gyro")
+        self.imu = self.robot.getDevice("imu")
         # actuators
         self.left_propeller = self.robot.getDevice("left_propeller_motor")
         self.right_propeller = self.robot.getDevice("right_propeller_motor")
@@ -28,6 +29,7 @@ class hardware_interface:
         self.compass.enable(self.timestep)
         self.accelerometer.enable(self.timestep)
         self.gyro.enable(self.timestep)
+        self.imu.enable(self.timestep)
 
     def get_gps_values(self):
         return self.gps.getValues()
@@ -49,6 +51,10 @@ class hardware_interface:
     
     def get_gyro_reading(self):
         reading = self.gyro.getValues()
+        return reading
+    
+    def get_imu_reading(self):
+        reading = self.imu.getRollPitchYaw()
         return reading
     
     def propellers_have_same_velocity(self):
