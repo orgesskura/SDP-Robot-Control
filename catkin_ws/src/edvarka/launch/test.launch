@@ -13,12 +13,12 @@
   
   <node pkg="robot_localization" type="ekf_localization_node" name="ekf_node_map" clear_params="true">
     <rosparam command="load" file="$(find robot_localization)/params/map_frame_node_params.yaml" />
-    <remap from="odometry/filtered" to="map_prediction"/>
+    <remap from="odometry/filtered" to="/map_prediction"/>
   </node>
 
   <node pkg="robot_localization" type="ekf_localization_node" name="ekf_node_odom" clear_params="true">
     <rosparam command="load" file="$(find robot_localization)/params/odom_frame_node_params.yaml" />
-    <remap from="odometry/filtered" to="odom_prediction"/>
+    <remap from="odometry/filtered" to="/odom_prediction"/>
   </node>
 
   <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true">
@@ -32,7 +32,7 @@
     <param name="broadcast_cartesian_transform" value="true"/>
     <param name="publish_filtered_gps" value="true"/>
 
-    <remap from="/imu/data" to="/imu_global" />
+    <remap from="/imu/data" to="/imu0_topic" />
     <remap from="/gps/fix" to="/gps_topic" />
     <remap from="/odometry/filtered" to="/map_prediction" />
     <remap from="/odometry/gps" to="/odom_gps" />

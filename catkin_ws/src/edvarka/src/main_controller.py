@@ -22,10 +22,10 @@ class main_controller:
         rospy.init_node("main_controller")
         # more ros stuff
         self.msg_seq = 0
-        self.imu0_pub = rospy.Publisher("imu0_topic", Imu, queue_size=5)
-        self.imu_global_pub = rospy.Publisher("imu_global", Imu, queue_size=5)
-        self.compass_pub = rospy.Publisher("compass_topic", PoseWithCovarianceStamped, queue_size=5)
-        self.gps_pub = rospy.Publisher("gps_topic", NavSatFix, queue_size=5)
+        self.imu0_pub = rospy.Publisher("/imu0_topic", Imu, queue_size=5)
+        self.imu_global_pub = rospy.Publisher("/imu_global", Imu, queue_size=5)
+        self.compass_pub = rospy.Publisher("/compass_topic", PoseWithCovarianceStamped, queue_size=5)
+        self.gps_pub = rospy.Publisher("/gps_topic", NavSatFix, queue_size=5)
 
         self.init_time = rospy.Time.now()
         # create the Robot instance.
@@ -54,8 +54,8 @@ class main_controller:
         rubbish_pos = utils.position(tmp[1], tmp[0])
         print("Angle to turn: {}".format(self.rm.get_angle_to_target(rubbish_pos)))
         print("Distance to target: {}".format(self.rm.get_distance_to_target(rubbish_pos)))
-        self.hi.set_left_propeller_velocity(0.5)
-        self.hi.set_right_propeller_velocity(0.5)
+        self.hi.set_left_propeller_velocity(-2)
+        self.hi.set_right_propeller_velocity(-2)
         # if self.rm.is_in_proximity(rubbish_pos):
         #     self.rm.open_arms()
         # else:
@@ -66,19 +66,41 @@ class main_controller:
 
 
     def send_sensor_readings_to_localization(self):
+        # Robot's axes:
+        # x points right
+        # y points front
+        # z points up
+
+        # z-axis angular velocity should be positive when rotating counter-clockwise
         z_axis_angular_vel = self.hi.get_gyro_reading()[2] # only interested in z axis angular velocity
-        # get global and local yaw values
-        global_yaw = self.hi.get_imu_reading()[0] + math.pi
-        if global_yaw > math.pi:
-            global_yaw -= math.pi*2
+
+        # get roll, pitch, yaw values
+        # yaw should be zero when robot's axes are aligned with the global axes
+        # i.e. y points north, x points east
+        roll = self.hi.get_imu_reading()[1]
+        pitch = self.hi.get_imu_reading()[2] + math.pi/2
+        yaw = self.hi.get_imu_reading()[0] + math.pi/2
+        print("Roll: {}".format(roll))
+        print("Pitch: {}".format(pitch))
+        print("Yaw: {}".format(yaw))
+        if yaw > math.pi:
+            yaw -= math.pi*2
         if self.initial_global_yaw == -100:
-            self.initial_global_yaw = global_yaw
-        local_yaw = global_yaw - self.initial_global_yaw
+            self.initial_global_yaw = yaw
+
         # get acceleration values
         linear_acc = self.hi.get_accelerometer_reading() # accelerometer reading with gravitational acceleration bias
-        roll = self.hi.get_imu_reading()[1]
-        g = 9.80665
-        y_axis_linear_acc = (linear_acc[1] + g*math.sin(roll))*math.cos(roll) # remove gravitational acc. component, then project to axis parallel to ground
+        g_quat = [0, 0, 9.81, 0]
+        rotate_by = tf.transformations.quaternion_from_euler(roll, pitch, yaw)
+        rotated_g = tf.transformations.quaternion_multiply(
+                tf.transformations.quaternion_multiply(rotate_by, g_quat),
+                tf.transformations.quaternion_conjugate(rotate_by)
+            )[:3]
+        linear_acc[0] -= rotated_g[0]
+        linear_acc[1] -= rotated_g[1]
+        linear_acc[2] -= rotated_g[2]
+        print("accelerometer: {}".format(linear_acc))
+        y_axis_linear_acc = linear_acc[1]
 
         # construct local-frame imu message
         self.msg_seq += 1
@@ -88,7 +110,7 @@ class main_controller:
         imu_msg.header.seq = self.msg_seq
         imu_msg.header.frame_id = "base_link"
         # quaternion
-        quat = tf.transformations.quaternion_from_euler(0, 0, local_yaw)
+        quat = tf.transformations.quaternion_from_euler(0, 0, yaw)
         imu_msg.orientation.x = quat[0]
         imu_msg.orientation.y = quat[1]
         imu_msg.orientation.z = quat[2]
@@ -111,7 +133,7 @@ class main_controller:
         la.z = 0
         imu_msg.linear_acceleration = la
         lac = [0 for i in range(9)]
-        lac[4] = 1
+        lac[4] = 0.1
         imu_msg.linear_acceleration_covariance = lac # TODO: AND THIS
         self.imu0_pub.publish(imu_msg)
 
@@ -122,7 +144,7 @@ class main_controller:
         imu_msg_global.header.seq = self.msg_seq
         imu_msg_global.header.frame_id = "map"
         # quaternion
-        quat = tf.transformations.quaternion_from_euler(0, 0, global_yaw)
+        quat = tf.transformations.quaternion_from_euler(0, 0, yaw)
         imu_msg_global.orientation.x = quat[0]
         imu_msg_global.orientation.y = quat[1]
         imu_msg_global.orientation.z = quat[2]
@@ -133,15 +155,15 @@ class main_controller:
         av = Vector3()
         av.x = 0
         av.y = 0
-        av.z = z_axis_angular_vel
+        av.z = 0#z_axis_angular_vel
         imu_msg_global.angular_velocity = av
         avc = [0 for i in range(9)]
         avc[8] = 0.0001
         imu_msg_global.angular_velocity_covariance = avc # TODO: FIX THIS
         # linear acceleration
         la = Vector3()
-        la.x = math.cos(global_yaw)*y_axis_linear_acc
-        la.y = math.sin(global_yaw)*y_axis_linear_acc
+        la.x = math.cos(yaw)*y_axis_linear_acc
+        la.y = -math.sin(yaw)*y_axis_linear_acc
         la.z = 0
         imu_msg_global.linear_acceleration = la
         lac = [0 for i in range(9)]
@@ -152,12 +174,11 @@ class main_controller:
 
         compass_reading = self.hi.get_compass_reading()
         # format compass_reading to be the counter-clockwise angle from east
-        if compass_reading > 0:
-            compass_reading -= 2*math.pi
         compass_reading *= -1
-        compass_reading += math.pi/2
-        if compass_reading >= 2*math.pi:
+        if compass_reading > math.pi:
             compass_reading -= 2*math.pi
+        if compass_reading < -math.pi:
+            compass_reading += 2*math.pi
         print("Compass: {}".format(compass_reading))
         comp_msg = PoseWithCovarianceStamped()
         comp_msg.header.stamp = rospy.Time.now()
@@ -178,9 +199,10 @@ class main_controller:
         gps_msg = NavSatFix()
         gps_msg.header.stamp = rospy.Time.now()
         gps_msg.header.seq = self.msg_seq
-        gps_msg.header.frame_id = "map"
+        gps_msg.header.frame_id = "base_link"
         gps_msg.latitude = gps_reading[0]
         gps_msg.longitude = gps_reading[1]
+        gps_msg.altitude = 0
         pos_cov = [1e-9 for i in range(9)] # TODO: change!
         pos_cov[0] = 1e-9
         pos_cov[4] = 1e-9

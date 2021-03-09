@@ -3,8 +3,8 @@ WorldInfo {
   gpsCoordinateSystem "WGS84"
 }
 Viewpoint {
-  orientation 0.4253175874728199 0.6144798329872428 0.6644693255811516 2.2790758273984744
-  position 2.651305162235348 0.8224197739187482 1.3836469906183104
+  orientation 0.9991542727258684 -0.0037841539736703966 -0.04094410180165592 0.23270024793281824
+  position -0.8630521349652096 -10.264507498589209 51.25135774592018
 }
 DEF NORTH_POINTER Solid {
   translation 0 12.23 0
@@ -69,12 +69,12 @@ DEF SWIMMING_POOL_BOTTOM Transform {
   ]
 }
 DEF EdVarka Robot {
-  translation -3.164351195030753 -1.836141013792132 0.4207649934622379
-  rotation 0.021371694961720856 -0.010470997531510318 0.9997167643213544 -1.3098553071795864
+  translation -8.634161986331712e-05 0.0002537327595399201 0.4375404516340544
+  rotation 0.024834595882207256 0.008913648522039281 0.9996518342490013 2.35741
   children [
     InertialUnit {
       translation 0 0 0.09
-      rotation 4.7949e-09 1.32679e-06 1 3.14159
+      rotation -3.406e-07 1.38426e-06 1 3.14159
       name "imu"
     }
     DEF BASKET Solid {
@@ -167,7 +167,7 @@ DEF EdVarka Robot {
     }
     DEF RIGHT_ARM HingeJoint {
       jointParameters HingeJointParameters {
-        position -0.002892745462380289
+        position -0.0029011481599322715
         axis 0 0 1
         anchor -0.16 -0.22 0.08
       }
@@ -179,8 +179,8 @@ DEF EdVarka Robot {
         }
       ]
       endPoint Solid {
-        translation -0.20020232454054895 -0.28988399746391424 0.03000000000000004
-        rotation 0 0 -1 0.002892745462449376
+        translation -0.20020291175322416 -0.2898836596534732 0.030000000000000096
+        rotation 0 0 -1 0.0029011481598594326
         children [
           Solid {
             rotation 1 0 0 0.261799
@@ -222,7 +222,7 @@ DEF EdVarka Robot {
     }
     DEF LEFT_ARM HingeJoint {
       jointParameters HingeJointParameters {
-        position 0.05882995329174638
+        position 0.07876427684755628
         axis 0 0 -1
         anchor 0.14 -0.22 0.08
       }
@@ -234,8 +234,8 @@ DEF EdVarka Robot {
         }
       ]
       endPoint Solid {
-        translation 0.1558496786355895 -0.2910548217023206 0.029999999999999805
-        rotation 0 0 -1 0.0588299532917431
+        translation 0.15443019359059193 -0.29135663608199375 0.029999999999999874
+        rotation 0 0 -1 0.07876427684755571
         children [
           Solid {
             rotation 1 0 0 0.261799
@@ -541,8 +541,8 @@ SolidPipe {
   }
 }
 DEF BOTTLE Robot {
-  translation -1.78 2.34 0.438114
-  rotation 0.9999999999999999 0 0 2.9760823625309517e-08
+  translation -1.78 2.34 0.43743550949090443
+  rotation 0.9999999999999987 -5.083839993253303e-08 7.646380666271927e-16 2.300895618755944e-07
   children [
     GPS {
     }
@@ -600,8 +600,8 @@ DEF BOTTLE Robot {
   controller ""
 }
 DEF BOX Robot {
-  translation -2.87 0.79 0.448114
-  rotation 0.9999999999999999 0 0 2.9760823625309517e-08
+  translation -2.87 0.79 0.4460029018333739
+  rotation 1 -1.5337811386400622e-08 1.9142979868024628e-16 5.167389448911133e-07
   children [
     GPS {
     }
@@ -656,8 +656,8 @@ DEF BOX Robot {
   controller ""
 }
 DEF BALL Robot {
-  translation -6.53 2.91 0.448114
-  rotation 0.9999999999999999 0 0 2.9760823625309517e-08
+  translation -6.53 2.91 0.4499311111367049
+  rotation 1 0 0 1.4338772682200344e-07
   children [
     GPS {
     }

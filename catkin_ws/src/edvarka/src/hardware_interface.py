@@ -57,6 +57,9 @@ class hardware_interface:
         reading = self.imu.getRollPitchYaw()
         return reading
     
+    def get_imu_reading_quaternion(self):
+        reading = self.imu.getQuaternion()
+    
     def propellers_have_same_velocity(self):
         return self.left_propeller.getVelocity() == self.right_propeller.getVelocity()
 
