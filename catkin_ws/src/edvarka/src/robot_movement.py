@@ -25,6 +25,10 @@ class robot_movement:
         self.t_Kp = 1
         self.t_Kd = 500
         self.t_Ki = 0.4
+        # Timer for stable facing
+        self.TIMER_DURATION = 10 # steps
+        self.is_timing = False
+        self.timer = self.TIMER_DURATION
 
     def get_angle_to_target(self, target_position):
         own_azimuth = self.hi.get_compass_reading()
@@ -95,12 +99,13 @@ class robot_movement:
     
     def goto_long_lat(self, target_position):
         if not self.is_facing(target_position):
+            self.is_timing = False
             self.face(target_position)
-        elif not self.hi.propellers_have_same_velocity():
-            self.hi.set_left_propeller_velocity(0)
-            self.hi.set_right_propeller_velocity(0)
-            for i in range(15):
-                self.hi.robot.step(self.hi.timestep)
+        elif not self.is_timing:
+            self.is_timing = True
+            self.timer = self.TIMER_DURATION # steps
+        elif self.timer != 0:
+            self.timer -= 1
         else:
             self.move_towards(target_position)
         

@@ -21,7 +21,10 @@
     <remap from="odometry/filtered" to="/odom_prediction"/>
   </node>
 
+  <!--
   <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true">
+
+    <param name="frequency" value="25"/>
 
     <param name="magnetic_declination_radians" value="0"/>
 
@@ -38,5 +41,6 @@
     <remap from="/odometry/gps" to="/odom_gps" />
 
   </node>
+  -->
 
 </launch>
