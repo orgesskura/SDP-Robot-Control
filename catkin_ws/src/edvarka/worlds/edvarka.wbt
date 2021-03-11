@@ -3,8 +3,8 @@ WorldInfo {
   gpsCoordinateSystem "WGS84"
 }
 Viewpoint {
-  orientation 0.9991542727258684 -0.0037841539736703966 -0.04094410180165592 0.23270024793281824
-  position -0.8630521349652096 -10.264507498589209 51.25135774592018
+  orientation 0.998746405985466 -0.009182358608562759 -0.049206715207363715 0.39298645140132404
+  position 1.1139369053083104 -7.8442653658643655 30.304890060186665
 }
 DEF NORTH_POINTER Solid {
   translation 0 12.23 0
@@ -69,8 +69,8 @@ DEF SWIMMING_POOL_BOTTOM Transform {
   ]
 }
 DEF EdVarka Robot {
-  translation -8.634161986331712e-05 0.0002537327595399201 0.4375404516340544
-  rotation 0.024834595882207256 0.008913648522039281 0.9996518342490013 2.35741
+  translation -0.0005023812832533649 -0.00023623123441328733 0.43752441283588295
+  rotation 0.0023054592896660647 -0.019510809184656086 -0.9998069879643887 3.076644309632118
   children [
     InertialUnit {
       translation 0 0 0.09
@@ -167,7 +167,7 @@ DEF EdVarka Robot {
     }
     DEF RIGHT_ARM HingeJoint {
       jointParameters HingeJointParameters {
-        position -0.0029011481599322715
+        position 1.5143899929138285
         axis 0 0 1
         anchor -0.16 -0.22 0.08
       }
@@ -179,8 +179,8 @@ DEF EdVarka Robot {
         }
       ]
       endPoint Solid {
-        translation -0.20020291175322416 -0.2898836596534732 0.030000000000000096
-        rotation 0 0 -1 0.0029011481598594326
+        translation -0.09236638618672893 -0.2638827333077296 0.030000000000000075
+        rotation 0 0 1 1.5143899929138283
         children [
           Solid {
             rotation 1 0 0 0.261799
@@ -218,11 +218,13 @@ DEF EdVarka Robot {
         physics Physics {
           mass 0.2
         }
+        linearVelocity 0.000614761780146232 0.0009557699093754428 -3.24296402375162e-05
+        angularVelocity 9.61566051515244e-05 -0.0006205264298810992 -0.015972262160601942
       }
     }
     DEF LEFT_ARM HingeJoint {
       jointParameters HingeJointParameters {
-        position 0.07876427684755628
+        position 1.5143899878779374
         axis 0 0 -1
         anchor 0.14 -0.22 0.08
       }
@@ -234,8 +236,8 @@ DEF EdVarka Robot {
         }
       ]
       endPoint Solid {
-        translation 0.15443019359059193 -0.29135663608199375 0.029999999999999874
-        rotation 0 0 -1 0.07876427684755571
+        translation 0.07123885775635894 -0.24391454196403956 0.029999999999999888
+        rotation 0 0 -1 1.5143899878779374
         children [
           Solid {
             rotation 1 0 0 0.261799
@@ -272,6 +274,8 @@ DEF EdVarka Robot {
         physics Physics {
           mass 0.2
         }
+        linearVelocity -0.00046730939226592976 0.000902390030202017 -3.677728944599517e-05
+        angularVelocity -9.161284595472769e-05 0.0006210369967782343 0.015983068260360236
       }
     }
     DEF L_FL Solid {
@@ -386,6 +390,7 @@ DEF EdVarka Robot {
       }
       slowHelix Solid {
         translation -0.125 0.26 0.035
+        rotation 0 -1 0 1.5439176201008629
         scale 0.01 0.01 0.01
         children [
           Solid {
@@ -432,6 +437,7 @@ DEF EdVarka Robot {
       }
       slowHelix Solid {
         translation 0.104 0.26 0.035
+        rotation 0 -1 0 1.3375261479045712
         scale 0.01 0.01 0.01
         children [
           Solid {
@@ -527,6 +533,8 @@ DEF EdVarka Robot {
     }
   }
   controller "<extern>"
+  linearVelocity -1.272332384194721e-05 -0.0001603409762940492 6.542926613340504e-06
+  angularVelocity 2.1596006371184623e-06 2.412746623438744e-07 5.120134271058855e-06
 }
 SolidPipe {
   translation 0 0 0.25
@@ -541,8 +549,8 @@ SolidPipe {
   }
 }
 DEF BOTTLE Robot {
-  translation -1.78 2.34 0.43743550949090443
-  rotation 0.9999999999999987 -5.083839993253303e-08 7.646380666271927e-16 2.300895618755944e-07
+  translation 1 1 0.437430587396066
+  rotation 0.999999999999999 -4.6042250082779163e-08 1.2831231551759655e-16 2.5659146795447926e-07
   children [
     GPS {
     }
@@ -600,8 +608,8 @@ DEF BOTTLE Robot {
   controller ""
 }
 DEF BOX Robot {
-  translation -2.87 0.79 0.4460029018333739
-  rotation 1 -1.5337811386400622e-08 1.9142979868024628e-16 5.167389448911133e-07
+  translation 2 -2 0.44599265359113477
+  rotation 1 -1.3721734154137075e-08 -2.521413297218984e-16 5.833489180611312e-07
   children [
     GPS {
     }
@@ -656,8 +664,8 @@ DEF BOX Robot {
   controller ""
 }
 DEF BALL Robot {
-  translation -6.53 2.91 0.4499311111367049
-  rotation 1 0 0 1.4338772682200344e-07
+  translation -6 8 0.4499498077506807
+  rotation 1 -2.8459223785610654e-09 2.0564503209965162e-16 1.5841991144064436e-07
   children [
     GPS {
     }

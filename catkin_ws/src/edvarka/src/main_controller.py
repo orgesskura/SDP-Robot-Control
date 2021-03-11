@@ -22,12 +22,14 @@ class main_controller:
     def __init__(self):
         # initialize ros node
         rospy.init_node("main_controller")
-        # more ros stuff
+        # publishers
         self.msg_seq = 0
         self.imu0_pub = rospy.Publisher("/imu0_topic", Imu, queue_size=5)
         self.compass_pub = rospy.Publisher("/compass_topic", PoseWithCovarianceStamped, queue_size=5)
-        self.gps_pub = rospy.Publisher("/gps_topic", NavSatFix, queue_size=5)
+        #self.gps_pub = rospy.Publisher("/gps_topic", NavSatFix, queue_size=5)
         self.gps_odom_pub = rospy.Publisher("/odom_gps", Odometry, queue_size=5)
+        # subscribers
+        self.robot_state_sub = rospy.Subscriber("/map_prediction", Odometry, callback=self.update_robot_state)
 
         self.init_time = rospy.Time.now()
         # create the Robot instance.
@@ -49,12 +51,12 @@ class main_controller:
         # setup stuff
         self.initial_global_yaw = -100
     
+    def update_robot_state(self, state):
+        # state is of type Odometry
+        self.rm.robot_state = state    
 
     def main_loop(self):
-        cr = self.hi.get_compass_reading()
-        gr = self.hi.get_gps_values()
-        tmp = (0, 0)
-        rubbish_pos = utils.position(tmp[1], tmp[0])
+        rubbish_pos = utils.xy_position(5, -5)
         print("Angle to turn: {}".format(self.rm.get_angle_to_target(rubbish_pos)))
         print("Distance to target: {}".format(self.rm.get_distance_to_target(rubbish_pos)))
         self.hi.set_left_propeller_velocity(-2)
@@ -83,9 +85,9 @@ class main_controller:
         roll = self.hi.get_imu_reading()[1]
         pitch = self.hi.get_imu_reading()[2] + math.pi/2
         yaw = self.hi.get_imu_reading()[0] + math.pi/2
-        print("Roll: {}".format(roll))
-        print("Pitch: {}".format(pitch))
-        print("Yaw: {}".format(yaw))
+        # print("Roll: {}".format(roll))
+        # print("Pitch: {}".format(pitch))
+        # print("Yaw: {}".format(yaw))
         if yaw > math.pi:
             yaw -= math.pi*2
         if self.initial_global_yaw == -100:
@@ -102,7 +104,6 @@ class main_controller:
         linear_acc[0] -= rotated_g[0]
         linear_acc[1] -= rotated_g[1]
         linear_acc[2] -= rotated_g[2]
-        print("accelerometer: {}".format(linear_acc))
         y_axis_linear_acc = linear_acc[1]
 
         # construct local-frame imu message
@@ -141,17 +142,16 @@ class main_controller:
         self.imu0_pub.publish(imu_msg)
 
         compass_reading = self.hi.get_compass_reading()
-        # format compass_reading to be the counter-clockwise angle from east
-        compass_reading *= -1
-        if compass_reading > math.pi:
-            compass_reading -= 2*math.pi
-        if compass_reading < -math.pi:
-            compass_reading += 2*math.pi
-        print("Compass: {}".format(compass_reading))
+        # compass_reading is the counter-clockwise angle from east
+        # if compass_reading > math.pi:
+        #     compass_reading -= 2*math.pi
+        # if compass_reading < -math.pi:
+        #     compass_reading += 2*math.pi
+        # print("Compass: {}".format(compass_reading))
         comp_msg = PoseWithCovarianceStamped()
         comp_msg.header.stamp = rospy.Time.now()
         comp_msg.header.seq = self.msg_seq
-        comp_msg.header.frame_id = "base_link"
+        comp_msg.header.frame_id = "map"
         quat = tf.transformations.quaternion_from_euler(0, 0, compass_reading)
         comp_msg.pose.pose.orientation.x = quat[0]
         comp_msg.pose.pose.orientation.y = quat[1]
@@ -182,7 +182,7 @@ class main_controller:
                 return
             if math.isnan(gps_reading[0]) or math.isnan(gps_reading[1]):
                 return
-            self.my_navsat_transform.set_origin(utils.position(gps_msg.longitude, gps_msg.latitude))
+            self.my_navsat_transform.set_origin(utils.longlat_position(gps_msg.longitude, gps_msg.latitude))
         odom_gps_msg = self.my_navsat_transform.transform_to_odometry(gps_msg)
         self.gps_odom_pub.publish(odom_gps_msg)
 
@@ -199,48 +199,33 @@ if __name__ == "__main__":
     #     mc.send_sensor_readings_to_localization()
     #     mc.robot.step(mc.timestep)
     # move towards box
-    tmp = [7.1375163565142205e-06, -2.5756252302227544e-05]
-    rubbish_pos = utils.position(tmp[1], tmp[0])
+    rubbish_pos = utils.xy_position(2, -2)
     while not mc.rm.is_at(rubbish_pos) and not rospy.is_shutdown():
-        cr = mc.hi.get_compass_reading()
-        gr = mc.hi.get_gps_values()
-        print("Angle to turn: {}".format(mc.rm.get_angle_to_target(rubbish_pos)))
-        print("Distance to target: {}".format(mc.rm.get_distance_to_target(rubbish_pos)))
-        if mc.rm.is_in_proximity(rubbish_pos):
+        if mc.rm.is_in_arms_open_distance(rubbish_pos):
             mc.rm.open_arms()
         else:
             mc.rm.close_arms()
-        mc.rm.goto_long_lat(rubbish_pos)
+        mc.rm.goto_xy(rubbish_pos)
         mc.send_sensor_readings_to_localization()
         mc.robot.step(mc.timestep)
     # move towards bottle
-    tmp = [2.1141504335055434e-05, -1.5974212838350998e-05]
-    rubbish_pos = utils.position(tmp[1], tmp[0])
+    rubbish_pos = utils.xy_position(1, 1)
     while not mc.rm.is_at(rubbish_pos) and not rospy.is_shutdown():
-        cr = mc.hi.get_compass_reading()
-        gr = mc.hi.get_gps_values()
-        print("Angle to turn: {}".format(mc.rm.get_angle_to_target(rubbish_pos)))
-        print("Distance to target: {}".format(mc.rm.get_distance_to_target(rubbish_pos)))
-        if mc.rm.is_in_proximity(rubbish_pos):
+        if mc.rm.is_in_arms_open_distance(rubbish_pos):
             mc.rm.open_arms()
         else:
             mc.rm.close_arms()
-        mc.rm.goto_long_lat(rubbish_pos)
+        mc.rm.goto_xy(rubbish_pos)
         mc.send_sensor_readings_to_localization()
         mc.robot.step(mc.timestep)
     # move towards sphere
-    tmp = [2.6291356923053307e-05, -5.860236671450979e-05]
-    rubbish_pos = utils.position(tmp[1], tmp[0])
+    rubbish_pos = utils.xy_position(-6, 8)
     while not mc.rm.is_at(rubbish_pos) and not rospy.is_shutdown():
-        cr = mc.hi.get_compass_reading()
-        gr = mc.hi.get_gps_values()
-        print("Angle to turn: {}".format(mc.rm.get_angle_to_target(rubbish_pos)))
-        print("Distance to target: {}".format(mc.rm.get_distance_to_target(rubbish_pos)))
-        if mc.rm.is_in_proximity(rubbish_pos):
+        if mc.rm.is_in_arms_open_distance(rubbish_pos):
             mc.rm.open_arms()
         else:
             mc.rm.close_arms()
-        mc.rm.goto_long_lat(rubbish_pos)
+        mc.rm.goto_xy(rubbish_pos)
         mc.send_sensor_readings_to_localization()
         mc.robot.step(mc.timestep)
     # finished collection

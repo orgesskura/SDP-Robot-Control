@@ -20,6 +20,8 @@ class hardware_interface:
         self.right_propeller = self.robot.getDevice("right_propeller_motor")
         self.set_left_propeller_position(float('+inf'))
         self.set_right_propeller_position(float('+inf'))
+        self.set_left_propeller_velocity(0)
+        self.set_right_propeller_velocity(0)
         self.left_arm = self.robot.getDevice("left_arm_motor")
         self.right_arm = self.robot.getDevice("right_arm_motor")
 
@@ -34,15 +36,18 @@ class hardware_interface:
     def get_gps_values(self):
         return self.gps.getValues()
 
+    # Returns the counter-clockwise angle in the range [-π, π] that the boat
+    # frame's y axis forms with the "true north", i.e. the global-frame y axis.
     def get_compass_reading(self):
         reading = self.compass.getValues()
-        pos1 = utils.position(0,0.5)
-        pos2 = utils.position(reading[0], reading[1])
-        angle = utils.angle_between_vectors(pos1, pos2)
-        if reading[0] > 0:
+        pos1 = utils.xy_position(0,0.5)
+        pos2 = utils.xy_position(reading[0], reading[1])
+        angle = utils.angle_between_xy_vectors(pos1, pos2)
+        if reading[0] < 0:
             angle *= -1
         noise = numpy.random.normal(loc=0, scale=math.radians(0.5), size=1)[0]
         #angle += noise
+        #print("Compass: {}".format(angle))
         return angle
     
     def get_accelerometer_reading(self):
