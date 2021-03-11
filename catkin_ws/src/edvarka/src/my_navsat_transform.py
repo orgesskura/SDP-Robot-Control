@@ -52,8 +52,8 @@ class my_navsat_transform:
         odom_msg.twist.twist.angular.y = 0
         odom_msg.twist.twist.angular.z = 0
         cov = [0 for i in range(36)]
-        cov[0] = navsatfix_msg.position_covariance[0]
-        cov[7] = navsatfix_msg.position_covariance[4]
+        cov[0] = navsatfix_msg.position_covariance[0] * 100000
+        cov[7] = navsatfix_msg.position_covariance[4] * 100000
         cov[14] = navsatfix_msg.position_covariance[8]
         odom_msg.pose.covariance = cov
         return odom_msg

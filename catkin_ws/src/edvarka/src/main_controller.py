@@ -119,16 +119,16 @@ class main_controller:
         imu_msg.orientation.y = quat[1]
         imu_msg.orientation.z = quat[2]
         imu_msg.orientation.w = quat[3]
-        imu_msg.orientation_covariance = [0.0001 for i in range(9)]
-        imu_msg.orientation_covariance[8] = 0.0001
+        imu_msg.orientation_covariance = [0 for i in range(9)]
+        imu_msg.orientation_covariance[8] = math.radians(1)**2
         # angular velocity
         av = Vector3()
         av.x = 0
         av.y = 0
         av.z = z_axis_angular_vel
         imu_msg.angular_velocity = av
-        avc = [0.0001 for i in range(9)]
-        avc[8] = 0.0001
+        avc = [0 for i in range(9)]
+        avc[8] = 0.02**2
         imu_msg.angular_velocity_covariance = avc # TODO: FIX THIS
         # linear acceleration
         la = Vector3()
@@ -136,8 +136,8 @@ class main_controller:
         la.y = y_axis_linear_acc
         la.z = 0
         imu_msg.linear_acceleration = la
-        lac = [0.05 for i in range(9)]
-        lac[4] = 0.05
+        lac = [0 for i in range(9)]
+        lac[4] = 0.1**2
         imu_msg.linear_acceleration_covariance = lac # TODO: AND THIS
         self.imu0_pub.publish(imu_msg)
 
@@ -159,7 +159,7 @@ class main_controller:
         comp_msg.pose.pose.orientation.w = quat[3]
         comp_cov = [0 for i in range(36)] # TODO: and this...
         for i in [0,7,14,21,28,35]:
-            comp_cov[i] = 0.0001
+            comp_cov[i] = math.radians(1)**2
         comp_msg.pose.covariance = comp_cov
         self.compass_pub.publish(comp_msg)
 
@@ -172,11 +172,10 @@ class main_controller:
         gps_msg.longitude = gps_reading[1]
         gps_msg.altitude = 0
         pos_cov = [0 for i in range(9)] # TODO: change!
-        pos_cov[0] = 1e-6
-        pos_cov[4] = 1e-6
+        pos_cov[0] = 0.0000005**2
+        pos_cov[4] = 0.0000005**2
         gps_msg.position_covariance = pos_cov
         gps_msg.position_covariance_type = NavSatFix.COVARIANCE_TYPE_DIAGONAL_KNOWN # TODO: change?
-        #self.gps_pub.publish(gps_msg)
         if self.my_navsat_transform.origin is None:
             if gps_reading[0] is None or gps_reading[1] is None:
                 return

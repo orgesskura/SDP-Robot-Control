@@ -34,7 +34,12 @@ class hardware_interface:
         self.imu.enable(self.timestep)
 
     def get_gps_values(self):
-        return self.gps.getValues()
+        reading = self.gps.getValues()
+        noise = numpy.random.normal(loc=0, scale=0.0000005, size=2)
+        reading[0] += noise[0]
+        reading[1] += noise[1]
+        #print("GPS: {}".format(reading))
+        return reading
 
     # Returns the counter-clockwise angle in the range [-π, π] that the boat
     # frame's y axis forms with the "true north", i.e. the global-frame y axis.
@@ -45,25 +50,33 @@ class hardware_interface:
         angle = utils.angle_between_xy_vectors(pos1, pos2)
         if reading[0] < 0:
             angle *= -1
-        noise = numpy.random.normal(loc=0, scale=math.radians(0.5), size=1)[0]
-        #angle += noise
-        #print("Compass: {}".format(angle))
+        noise = numpy.random.normal(loc=0, scale=math.radians(1), size=1)[0]
+        angle += noise
         return angle
     
     def get_accelerometer_reading(self):
         reading = self.accelerometer.getValues()
+        noise = numpy.random.normal(loc=0, scale=0.1, size=3)
+        reading[0] += noise[0]
+        reading[1] += noise[1]
+        reading[2] += noise[2]
         return reading
     
     def get_gyro_reading(self):
         reading = self.gyro.getValues()
+        noise = numpy.random.normal(loc=0, scale=0.02, size=3)
+        reading[0] += noise[0]
+        reading[1] += noise[1]
+        reading[2] += noise[2]
         return reading
     
     def get_imu_reading(self):
         reading = self.imu.getRollPitchYaw()
+        noise = numpy.random.normal(loc=0, scale=math.radians(1), size=3)
+        reading[0] += noise[0]
+        reading[1] += noise[1]
+        reading[2] += noise[2]
         return reading
-    
-    def get_imu_reading_quaternion(self):
-        reading = self.imu.getQuaternion()
     
     def propellers_have_same_velocity(self):
         return self.left_propeller.getVelocity() == self.right_propeller.getVelocity()

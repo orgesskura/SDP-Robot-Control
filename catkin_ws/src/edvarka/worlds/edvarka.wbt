@@ -3,8 +3,8 @@ WorldInfo {
   gpsCoordinateSystem "WGS84"
 }
 Viewpoint {
-  orientation 0.998746405985466 -0.009182358608562759 -0.049206715207363715 0.39298645140132404
-  position 1.1139369053083104 -7.8442653658643655 30.304890060186665
+  orientation -0.999389916200561 0.011024032451043983 0.03314009814641402 5.620303110398319
+  position 1.1079993103508152 -21.439161273312834 27.858978994405245
 }
 DEF NORTH_POINTER Solid {
   translation 0 12.23 0
@@ -211,15 +211,21 @@ DEF EdVarka Robot {
               }
             ]
             name ""
-            boundingObject USE RIGHT_ARM_SHAPE
           }
         ]
         name "<STL_BINARY>(4)"
+        boundingObject Transform {
+          translation -0.015 -0.0273206 0.00732053
+          rotation -1 0 0 -0.523595307179586
+          children [
+            Box {
+              size 0.01 0.1 0.04
+            }
+          ]
+        }
         physics Physics {
           mass 0.2
         }
-        linearVelocity 0.000614761780146232 0.0009557699093754428 -3.24296402375162e-05
-        angularVelocity 9.61566051515244e-05 -0.0006205264298810992 -0.015972262160601942
       }
     }
     DEF LEFT_ARM HingeJoint {
@@ -271,11 +277,18 @@ DEF EdVarka Robot {
           }
         ]
         name "<STL_BINARY>"
+        boundingObject Transform {
+          translation 0.03 -0.0273206 0.0073205
+          rotation 1 0 0 0.523599
+          children [
+            Box {
+              size 0.01 0.1 0.04
+            }
+          ]
+        }
         physics Physics {
           mass 0.2
         }
-        linearVelocity -0.00046730939226592976 0.000902390030202017 -3.677728944599517e-05
-        angularVelocity -9.161284595472769e-05 0.0006210369967782343 0.015983068260360236
       }
     }
     DEF L_FL Solid {

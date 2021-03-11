@@ -8,8 +8,8 @@ class robot_movement:
     def __init__(self, hardware_interface):
         self.hi = hardware_interface
         # constants
-        self.MAX_FACING_THRESHOLD = math.radians(20)
-        self.MIN_FACING_THRESHOLD = math.radians(10)
+        self.MAX_FACING_THRESHOLD = math.radians(15)
+        self.MIN_FACING_THRESHOLD = math.radians(5)
         self.FACING_THRESHOLD = math.radians(5)
         self.DISTANCE_THRESHOLD = 0.1 # meter(s)
         self.ARMS_OPEN_DISTANCE = 1
@@ -68,8 +68,8 @@ class robot_movement:
     # rotate by to face in the desired direction (given as yaw).
     def get_angle_to_yaw(self, target_yaw):
         own_yaw = self.get_own_yaw()
-        print("Yaw: {}".format(own_yaw))
         ret = target_yaw - own_yaw
+        print("Yaw: {}\nAngle to: {}".format(own_yaw, ret))
         # answer must be between -π and π
         while ret < math.pi:
             ret += 2*math.pi
@@ -77,11 +77,22 @@ class robot_movement:
             ret -= 2*math.pi
         return ret
     
+    # Calculates the variable facing threshold, which increases the closer 
+    # the robot is to the target.
+    def get_variable_facing_threshold(self, target_position):
+        dist = self.get_distance_to_target(target_position)
+        thresh = math.radians(-10/3.0*dist + 55/3.0)
+        if thresh < self.MIN_FACING_THRESHOLD:
+            thresh = self.MIN_FACING_THRESHOLD
+        if thresh > self.MAX_FACING_THRESHOLD:
+            thresh = self.MAX_FACING_THRESHOLD
+        return thresh
+
     # Returns true if the robot is facing the target position within the
     # acceptable error.
     def is_facing_target(self, target_position):
         angle_to_target = self.get_angle_to_target(target_position)
-        return abs(angle_to_target) < self.FACING_THRESHOLD
+        return abs(angle_to_target) < self.get_variable_facing_threshold(target_position)
     
     # Returns true if the robot is facing in the desired direction within
     # the acceptable error.
