@@ -180,5 +180,3 @@ class robot_movement:
     
     def close_arms(self):
         self.hi.set_arms_position(self.ARMS_CLOSED)
-        
-

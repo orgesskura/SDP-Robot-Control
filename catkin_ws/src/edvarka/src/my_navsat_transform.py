@@ -36,8 +36,8 @@ class my_navsat_transform:
             x_coordinate *= -1
         # add gaussian noise with s.d. 1m
         noise = numpy.random.normal(loc=0, scale=0.2, size=2)
-        x_coordinate += noise[0]
-        y_coordinate += noise[1]
+        # x_coordinate += noise[0]
+        # y_coordinate += noise[1]
         self.seq += 1
         odom_msg = Odometry()
         odom_msg.header.seq = self.seq
