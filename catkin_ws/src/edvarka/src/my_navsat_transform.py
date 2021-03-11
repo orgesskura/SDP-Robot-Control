@@ -2,6 +2,8 @@
 from sensor_msgs.msg import NavSatFix
 from nav_msgs.msg import Odometry
 import rospy
+
+import numpy
  
 import utils
 
@@ -32,14 +34,18 @@ class my_navsat_transform:
         )
         if navsatfix_msg.longitude < self.origin.longitude:
             x_coordinate *= -1
+        # add gaussian noise with s.d. 1m
+        noise = numpy.random.normal(loc=0, scale=0.2, size=2)
+        x_coordinate += noise[0]
+        y_coordinate += noise[1]
         self.seq += 1
         odom_msg = Odometry()
         odom_msg.header.seq = self.seq
         odom_msg.header.stamp = rospy.Time.now()
         odom_msg.header.frame_id = "map"
         odom_msg.child_frame_id = ""
-        odom_msg.pose.pose.position.x = round(x_coordinate, 3)
-        odom_msg.pose.pose.position.y = round(y_coordinate, 3)
+        odom_msg.pose.pose.position.x = x_coordinate
+        odom_msg.pose.pose.position.y = y_coordinate
         odom_msg.pose.pose.position.z = 0
         odom_msg.pose.pose.orientation.x = 0
         odom_msg.pose.pose.orientation.y = 0
@@ -52,8 +58,8 @@ class my_navsat_transform:
         odom_msg.twist.twist.angular.y = 0
         odom_msg.twist.twist.angular.z = 0
         cov = [0 for i in range(36)]
-        cov[0] = navsatfix_msg.position_covariance[0] * 100000
-        cov[7] = navsatfix_msg.position_covariance[4] * 100000
+        cov[0] = 0.2**2#(navsatfix_msg.position_covariance[0] * 100000)**2
+        cov[7] = 0.2**2#(navsatfix_msg.position_covariance[4] * 100000)**2
         cov[14] = navsatfix_msg.position_covariance[8]
         odom_msg.pose.covariance = cov
         return odom_msg

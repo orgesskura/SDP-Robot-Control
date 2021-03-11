@@ -172,8 +172,8 @@ class main_controller:
         gps_msg.longitude = gps_reading[1]
         gps_msg.altitude = 0
         pos_cov = [0 for i in range(9)] # TODO: change!
-        pos_cov[0] = 0.0000005**2
-        pos_cov[4] = 0.0000005**2
+        pos_cov[0] = 0.00001
+        pos_cov[4] = 0.00001
         gps_msg.position_covariance = pos_cov
         gps_msg.position_covariance_type = NavSatFix.COVARIANCE_TYPE_DIAGONAL_KNOWN # TODO: change?
         if self.my_navsat_transform.origin is None:

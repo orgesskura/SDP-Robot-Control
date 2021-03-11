@@ -35,9 +35,9 @@ class hardware_interface:
 
     def get_gps_values(self):
         reading = self.gps.getValues()
-        noise = numpy.random.normal(loc=0, scale=0.0000005, size=2)
-        reading[0] += noise[0]
-        reading[1] += noise[1]
+        # noise = numpy.random.normal(loc=0, scale=0.00001, size=2)
+        # reading[0] += noise[0]
+        # reading[1] += noise[1]
         #print("GPS: {}".format(reading))
         return reading
 
