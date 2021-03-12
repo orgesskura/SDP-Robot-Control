@@ -6,6 +6,15 @@ import sys
 from object_detection_utils import *
 from camera_feedback_control import *
 
+def image_object_detect(img_base,img_obj):
+    # get segmentated image
+    seg_img = segment_object(frame_base,frame_object)
+    obj_img = get_main_object(seg_img)
+    # detect object exist or not
+    obj_exist = object_exist(obj_img)
+    return obj_exist
+
+# high parameters
 OBJECT_EXIST_RATE = 0.5
 timeout = 10
 
