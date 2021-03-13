@@ -100,7 +100,7 @@ def video_object_detect(rate, show=True):
 
 if __name__ == '__main__':
     rospy.init_node(name="object_detection_node")
-    rate = rospy.Rate(10) # Hz
+    rate = rospy.Rate(20) # Hz
     front_image_sub = rospy.Subscriber("/front_camera_view", Image, queue_size=1, callback=update_front_image)
     water_image_sub = rospy.Subscriber("/water_camera_view", Image, queue_size=1, callback=update_water_image)
     is_object_detected_pub = rospy.Publisher("/is_object_detected", Bool, queue_size=1)

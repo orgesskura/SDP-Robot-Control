@@ -28,6 +28,12 @@ class robot_movement:
         self.t_Kp = 1
         self.t_Kd = 500
         self.t_Ki = 0.1
+        # PID controller for facing (using vision)
+        self.INCLUDE_I_TERM_THRESHOLD_V = 10
+        self.last_v_error = 0
+        self.v_Kp = 0.08
+        self.v_Kd = 1
+        self.v_Ki = 0
         # Timer for stable facing
         self.TIMER_DURATION = 10 # steps
         self.is_timing = False
@@ -123,6 +129,26 @@ class robot_movement:
         rotation_velocity = self.cap_propeller_velocity(rotation_velocity)
         self.hi.set_left_propeller_velocity(-rotation_velocity)
         self.hi.set_right_propeller_velocity(rotation_velocity)
+    
+    # Adjusts the speed of the propellers using a PID controller in order to
+    # achieve the goal of the boat facing in the target yaw (measured anti-clockwise)
+    # from north (y-axis)).
+    def face_object_vision(self, object_pos_in_image):
+        if object_pos_in_image is None:
+            self.hi.set_left_propeller_velocity(0)
+            self.hi.set_right_propeller_velocity(0)
+            return
+        error = object_pos_in_image
+        error_derivative = (error - self.last_v_error) / self.hi.timestep
+        self.last_v_error = error
+        error_integral = error * self.hi.timestep
+        include_i_term = 0
+        if abs(error) < self.INCLUDE_I_TERM_THRESHOLD_V:
+            include_i_term = 1
+        rotation_velocity = (self.v_Kp*error + self.v_Kd*error_derivative + include_i_term*self.v_Ki*error_integral)
+        rotation_velocity = self.cap_propeller_velocity(rotation_velocity)
+        self.hi.set_left_propeller_velocity(rotation_velocity)
+        self.hi.set_right_propeller_velocity(-rotation_velocity)
     
     # Returns the distance, in meters, from the boat to the target (given as util.xy_position)
     def get_distance_to_target(self, target_position):

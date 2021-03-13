@@ -20,6 +20,7 @@ from my_navsat_transform import my_navsat_transform
 from hardware_interface import hardware_interface
 from robot_movement import robot_movement
 import utils
+from WebAppFirebase import UpdateDatabase
 
 class main_controller:
 
@@ -57,12 +58,16 @@ class main_controller:
 
         # setup camera image reading stuff
         self.bridge = CvBridge()
-        self.image_read_rate = rospy.Rate(10) # Hz
+        self.image_read_rate = rospy.Rate(20) # Hz
         self.image_read_thread = threading.Thread(target=self.publish_camera_images, daemon=True)
         self.image_read_thread.start()
         # setup object detection variables
         self.is_object_detected = False
         self.object_dist_from_center = None
+
+        # setup server data uploader
+        self.data_send_rate = rospy.Rate(1/5) # Hz
+
     
     def update_is_object_detected(self, is_object_detected):
         self.is_object_detected = is_object_detected.data
@@ -214,6 +219,7 @@ class main_controller:
         #     self.rm.close_arms()
         # self.rm.goto_xy(rubbish_pos)
         if self.is_object_detected:
+            self.rm.face_object_vision(self.object_dist_from_center)
             print("Object distance from image center: {}".format(self.object_dist_from_center))
         self.robot.step(self.timestep)
         self.send_sensor_readings_to_localization()
