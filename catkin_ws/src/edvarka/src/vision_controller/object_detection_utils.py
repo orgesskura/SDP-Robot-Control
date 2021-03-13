@@ -4,7 +4,7 @@ import numpy as np
 # high parameters
 IMG_SIZE = (256,256)
 X_CENTER = int(256//2)
-OBJECT_THRESH = int((256*256) * 0.0005)
+OBJECT_THRESH = int((256*256) * 0.00005)
 
 ################################################################################################
 # object segmentation functions

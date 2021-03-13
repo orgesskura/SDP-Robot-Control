@@ -20,7 +20,7 @@ from my_navsat_transform import my_navsat_transform
 from hardware_interface import hardware_interface
 from robot_movement import robot_movement
 import utils
-from WebAppFirebase import UpdateDatabase
+from WebAppFirebase import updateDatabase
 
 class main_controller:
 
@@ -64,10 +64,27 @@ class main_controller:
         # setup object detection variables
         self.is_object_detected = False
         self.object_dist_from_center = None
+        
+        # battery
+        self.battery_level = 100
 
         # setup server data uploader
         self.data_send_rate = rospy.Rate(1/5) # Hz
+        self.data_send_thread = threading.Thread(target=self.send_data_to_server, daemon=True)
+        self.data_send_thread.start()
 
+        # path planning
+
+    
+    def send_data_to_server(self):
+        while True:
+            self.data_send_rate.sleep()
+            gps_reading = self.hi.get_gps_values()
+            long_lat_pos = utils.longlat_position(gps_reading[1], gps_reading[0])
+            battery = self.battery_level
+            if long_lat_pos is None or battery is None:
+                continue
+            updateDatabase(long_lat_pos, battery)
     
     def update_is_object_detected(self, is_object_detected):
         self.is_object_detected = is_object_detected.data

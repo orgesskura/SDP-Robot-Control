@@ -3,7 +3,9 @@
 # Import python wrapper for firebase API: pyrebase
 import pyrebase
 
-def UpdateDatabase():
+import utils
+
+def updateDatabase(long_lat_pos, battery):
 	
 	# Connect to database
 
@@ -23,11 +25,11 @@ def UpdateDatabase():
 	db = firebase.database()
 	
 	# get robot details (temporarily hardcoded to test)
-	latitude = 56.647299
-	longitude = -2.762054
-	battery = 43
+	offset = utils.longlat_position(-3.161150, 55.952237)
+	latitude = long_lat_pos.latitude + offset.latitude
+	longitude = long_lat_pos.longitude + offset.longitude
 	
 	# Update the database
-	db.child("Test").update({"Battery": 24})
+	db.child("Test").update({"Battery": battery})
 	db.child("Test").child("Location").update({"Latitude": latitude})
 	db.child("Test").child("Location").update({"Longitude": longitude})
