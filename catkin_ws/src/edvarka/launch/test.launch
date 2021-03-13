@@ -21,6 +21,8 @@
     <remap from="odometry/filtered" to="/odom_prediction"/>
   </node>
 
+  <node pkg="edvarka" type="video_object_detection.py" name="object_detection_node" output="screen" />
+
   <!--
   <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true">
 

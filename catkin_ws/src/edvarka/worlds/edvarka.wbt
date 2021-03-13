@@ -3,8 +3,8 @@ WorldInfo {
   gpsCoordinateSystem "WGS84"
 }
 Viewpoint {
-  orientation -0.999389916200561 0.011024032451043983 0.03314009814641402 5.620303110398319
-  position 1.1079993103508152 -21.439161273312834 27.858978994405245
+  orientation -0.9979762329028757 0.04928104820979253 0.04018478379099178 5.021993696257219
+  position -0.08233458771646367 -1.434268542106616 1.0144553302075998
 }
 DEF NORTH_POINTER Solid {
   translation 0 12.23 0
@@ -22,6 +22,7 @@ DEF NORTH_POINTER Solid {
   ]
 }
 TexturedBackground {
+  reflections FALSE
 }
 TexturedBackgroundLight {
 }
@@ -31,10 +32,11 @@ DEF STILL_WATER Fluid {
   children [
     DEF S Shape {
       appearance DEF WATER_APPEARANCE PBRAppearance {
-        baseColor 0 0.501961 1
-        transparency 0.5
-        roughness 1.1102230246251565e-16
+        baseColor 0.12549 0.290196 0.529412
+        transparency 0.2
+        roughness 1
         metalness 0
+        emissiveColor 0.0453346 0.0764935 0.4
       }
       geometry Cylinder {
         height 0.4
@@ -69,9 +71,53 @@ DEF SWIMMING_POOL_BOTTOM Transform {
   ]
 }
 DEF EdVarka Robot {
-  translation -0.0005023812832533649 -0.00023623123441328733 0.43752441283588295
-  rotation 0.0023054592896660647 -0.019510809184656086 -0.9998069879643887 3.076644309632118
+  translation -0.0001715946652493909 -0.0006323991851028415 0.4374914057906722
+  rotation 0.0024884147203106085 -0.02355462377029589 -0.9997194543926907 3.076852658923041
   children [
+    Camera {
+      translation -0.0100005 0.245167 0.119297
+      rotation 1 0 0 1.0472
+      children [
+        Transform {
+          rotation 1 0 0 1.5708
+          children [
+            Shape {
+              appearance PBRAppearance {
+              }
+              geometry Cone {
+                bottomRadius 0.01
+                height 0.01
+              }
+            }
+          ]
+        }
+      ]
+      name "water_camera"
+      width 256
+      height 256
+    }
+    Camera {
+      translation -0.00999973 -0.238492 0.132954
+      rotation -1.272895005449756e-06 -0.5523350083134592 -0.8336222397403699 3.1401452508947916
+      children [
+        Transform {
+          rotation 1 0 0 1.5708
+          children [
+            Shape {
+              appearance PBRAppearance {
+              }
+              geometry Cone {
+                bottomRadius 0.01
+                height 0.01
+              }
+            }
+          ]
+        }
+      ]
+      name "front_camera"
+      width 256
+      height 256
+    }
     InertialUnit {
       translation 0 0 0.09
       rotation -3.406e-07 1.38426e-06 1 3.14159
@@ -167,7 +213,7 @@ DEF EdVarka Robot {
     }
     DEF RIGHT_ARM HingeJoint {
       jointParameters HingeJointParameters {
-        position 1.5143899929138285
+        position 1.4417823213587817
         axis 0 0 1
         anchor -0.16 -0.22 0.08
       }
@@ -179,8 +225,8 @@ DEF EdVarka Robot {
         }
       ]
       endPoint Solid {
-        translation -0.09236638618672893 -0.2638827333077296 0.030000000000000075
-        rotation 0 0 1 1.5143899929138283
+        translation -0.09572801008666143 -0.2686735175694105 0.030000000000000082
+        rotation 0 0 1 1.4417823213587817
         children [
           Solid {
             rotation 1 0 0 0.261799
@@ -230,7 +276,7 @@ DEF EdVarka Robot {
     }
     DEF LEFT_ARM HingeJoint {
       jointParameters HingeJointParameters {
-        position 1.5143899878779374
+        position 1.4413868866173936
         axis 0 0 -1
         anchor 0.14 -0.22 0.08
       }
@@ -242,8 +288,8 @@ DEF EdVarka Robot {
         }
       ]
       endPoint Solid {
-        translation 0.07123885775635894 -0.24391454196403956 0.029999999999999888
-        rotation 0 0 -1 1.5143899878779374
+        translation 0.07316629144241107 -0.24886616359060057 0.029999999999999888
+        rotation 0 0 -1 1.4413868866173933
         children [
           Solid {
             rotation 1 0 0 0.261799
@@ -546,8 +592,8 @@ DEF EdVarka Robot {
     }
   }
   controller "<extern>"
-  linearVelocity -1.272332384194721e-05 -0.0001603409762940492 6.542926613340504e-06
-  angularVelocity 2.1596006371184623e-06 2.412746623438744e-07 5.120134271058855e-06
+  linearVelocity 7.976414085118492e-06 -0.0002094496072583718 1.019653614761214e-05
+  angularVelocity 9.313570442711289e-06 3.9998925852442227e-07 3.610271337385427e-06
 }
 SolidPipe {
   translation 0 0 0.25
@@ -562,8 +608,8 @@ SolidPipe {
   }
 }
 DEF BOTTLE Robot {
-  translation 1 1 0.437430587396066
-  rotation 0.999999999999999 -4.6042250082779163e-08 1.2831231551759655e-16 2.5659146795447926e-07
+  translation -0.00336525 1.47113 0.43743231795318627
+  rotation 0.8110952500388612 0.3811724101484937 -0.4436576259977794 8.160416215942953e-05
   children [
     GPS {
     }
@@ -584,6 +630,7 @@ DEF BOTTLE Robot {
             height 0.07
             radius 0.02
           }
+          castShadows FALSE
         }
       ]
       immersionProperties [
@@ -621,8 +668,8 @@ DEF BOTTLE Robot {
   controller ""
 }
 DEF BOX Robot {
-  translation 2 -2 0.44599265359113477
-  rotation 1 -1.3721734154137075e-08 -2.521413297218984e-16 5.833489180611312e-07
+  translation 2 -2 0.44599265359112344
+  rotation 1 -4.7055203342825305e-09 -2.7162647555873776e-15 1.7010996030383545e-06
   children [
     GPS {
     }
@@ -678,7 +725,7 @@ DEF BOX Robot {
 }
 DEF BALL Robot {
   translation -6 8 0.4499498077506807
-  rotation 1 -2.8459223785610654e-09 2.0564503209965162e-16 1.5841991144064436e-07
+  rotation 0.9999999999999998 -2.055334833710364e-08 1.4851754251066696e-15 3.9454854808192187e-07
   children [
     GPS {
     }

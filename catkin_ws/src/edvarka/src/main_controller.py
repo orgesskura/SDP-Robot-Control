@@ -5,12 +5,15 @@
 #  from controller import Robot, Motor, DistanceSensor
 
 import math
+import threading
+
 from controller import Robot
 import rospy
 import tf
-from sensor_msgs.msg import Imu, NavSatFix
+from sensor_msgs.msg import Imu, NavSatFix, Image
 from geometry_msgs.msg import Vector3, PoseWithCovarianceStamped, Quaternion
 from nav_msgs.msg import Odometry
+from cv_bridge import CvBridge
 
 from my_navsat_transform import my_navsat_transform
 from hardware_interface import hardware_interface
@@ -26,8 +29,9 @@ class main_controller:
         self.msg_seq = 0
         self.imu0_pub = rospy.Publisher("/imu0_topic", Imu, queue_size=5)
         self.compass_pub = rospy.Publisher("/compass_topic", PoseWithCovarianceStamped, queue_size=5)
-        #self.gps_pub = rospy.Publisher("/gps_topic", NavSatFix, queue_size=5)
         self.gps_odom_pub = rospy.Publisher("/odom_gps", Odometry, queue_size=5)
+        self.front_image_pub = rospy.Publisher("/front_camera_view", Image, queue_size=1)
+        self.water_image_pub = rospy.Publisher("/water_camera_view", Image, queue_size=1)
         # subscribers
         self.robot_state_sub = rospy.Subscriber("/map_prediction", Odometry, callback=self.update_robot_state)
 
@@ -48,27 +52,15 @@ class main_controller:
         # initialize navsat transform
         self.my_navsat_transform = my_navsat_transform()
 
-        # setup stuff
-        self.initial_global_yaw = -100
+        # setup camera image reading stuff
+        self.bridge = CvBridge()
+        self.image_read_rate = rospy.Rate(10) # Hz
+        self.image_read_thread = threading.Thread(target=self.publish_camera_images, daemon=True)
+        self.image_read_thread.start()
     
     def update_robot_state(self, state):
         # state is of type Odometry
         self.rm.robot_state = state    
-
-    def main_loop(self):
-        rubbish_pos = utils.xy_position(5, -5)
-        print("Angle to turn: {}".format(self.rm.get_angle_to_target(rubbish_pos)))
-        print("Distance to target: {}".format(self.rm.get_distance_to_target(rubbish_pos)))
-        self.hi.set_left_propeller_velocity(-2)
-        self.hi.set_right_propeller_velocity(-2)
-        # if self.rm.is_in_proximity(rubbish_pos):
-        #     self.rm.open_arms()
-        # else:
-        #     self.rm.close_arms()
-        # self.rm.goto_long_lat(rubbish_pos)
-        self.robot.step(self.timestep)
-        self.send_sensor_readings_to_localization()
-
 
     def send_sensor_readings_to_localization(self):
         # Robot's axes:
@@ -90,8 +82,6 @@ class main_controller:
         # print("Yaw: {}".format(yaw))
         if yaw > math.pi:
             yaw -= math.pi*2
-        if self.initial_global_yaw == -100:
-            self.initial_global_yaw = yaw
 
         # get acceleration values
         linear_acc = self.hi.get_accelerometer_reading() # accelerometer reading with gravitational acceleration bias
@@ -184,6 +174,33 @@ class main_controller:
             self.my_navsat_transform.set_origin(utils.longlat_position(gps_msg.longitude, gps_msg.latitude))
         odom_gps_msg = self.my_navsat_transform.transform_to_odometry(gps_msg)
         self.gps_odom_pub.publish(odom_gps_msg)
+    
+    def publish_camera_images(self):
+        while True:
+            img_front = self.hi.get_front_camera_image()
+            img_water = self.hi.get_water_camera_image()
+            if img_front is not None and img_water is not None:
+                try:
+                    img_front_msg = self.bridge.cv2_to_imgmsg(img_front)
+                    img_water_msg = self.bridge.cv2_to_imgmsg(img_water)
+                except Exception as e:
+                    print(e)
+                    print("Exiting image publisher thread...")
+                    return
+                self.front_image_pub.publish(img_front_msg)
+                self.water_image_pub.publish(img_water_msg)
+            self.image_read_rate.sleep()
+
+    
+    def main_loop(self):
+        # rubbish_pos = utils.xy_position(3,3)
+        # if self.rm.is_in_arms_open_distance(rubbish_pos):
+        #     self.rm.open_arms()
+        # else:
+        #     self.rm.close_arms()
+        # self.rm.goto_xy(rubbish_pos)
+        self.robot.step(self.timestep)
+        self.send_sensor_readings_to_localization()
 
 
 
@@ -191,45 +208,6 @@ class main_controller:
 
 if __name__ == "__main__":
     mc = main_controller()
-    # while not rospy.is_shutdown():
-    #     mc.main_loop()
-    # while not rospy.is_shutdown():
-    #     mc.rm.face(utils.position(1,-1))
-    #     mc.send_sensor_readings_to_localization()
-    #     mc.robot.step(mc.timestep)
-    # move towards box
-    rubbish_pos = utils.xy_position(2, -2)
-    while not mc.rm.is_at(rubbish_pos) and not rospy.is_shutdown():
-        if mc.rm.is_in_arms_open_distance(rubbish_pos):
-            mc.rm.open_arms()
-        else:
-            mc.rm.close_arms()
-        mc.rm.goto_xy(rubbish_pos)
-        mc.send_sensor_readings_to_localization()
-        mc.robot.step(mc.timestep)
-    # move towards bottle
-    rubbish_pos = utils.xy_position(1, 1)
-    while not mc.rm.is_at(rubbish_pos) and not rospy.is_shutdown():
-        if mc.rm.is_in_arms_open_distance(rubbish_pos):
-            mc.rm.open_arms()
-        else:
-            mc.rm.close_arms()
-        mc.rm.goto_xy(rubbish_pos)
-        mc.send_sensor_readings_to_localization()
-        mc.robot.step(mc.timestep)
-    # move towards sphere
-    rubbish_pos = utils.xy_position(-6, 8)
-    while not mc.rm.is_at(rubbish_pos) and not rospy.is_shutdown():
-        if mc.rm.is_in_arms_open_distance(rubbish_pos):
-            mc.rm.open_arms()
-        else:
-            mc.rm.close_arms()
-        mc.rm.goto_xy(rubbish_pos)
-        mc.send_sensor_readings_to_localization()
-        mc.robot.step(mc.timestep)
-    # finished collection
     while not rospy.is_shutdown():
-        mc.rm.close_arms()
-        mc.hi.set_left_propeller_velocity(1)
-        mc.hi.set_right_propeller_velocity(1)
-        mc.robot.step(mc.timestep)
+        mc.main_loop()
+

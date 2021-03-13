@@ -1,4 +1,5 @@
 import numpy.random
+import numpy as np
 import math
 
 from controller import Robot
@@ -15,6 +16,8 @@ class hardware_interface:
         self.accelerometer = self.robot.getDevice("accelerometer")
         self.gyro = self.robot.getDevice("gyro")
         self.imu = self.robot.getDevice("imu")
+        self.front_camera = self.robot.getDevice("front_camera")
+        self.water_camera = self.robot.getDevice("water_camera")
         # actuators
         self.left_propeller = self.robot.getDevice("left_propeller_motor")
         self.right_propeller = self.robot.getDevice("right_propeller_motor")
@@ -32,13 +35,27 @@ class hardware_interface:
         self.accelerometer.enable(self.timestep)
         self.gyro.enable(self.timestep)
         self.imu.enable(self.timestep)
+        self.front_camera.enable(self.timestep)
+        self.water_camera.enable(self.timestep)
+
+    def get_front_camera_image(self):
+        cam = self.front_camera
+        camera_data = cam.getImage()
+        if camera_data is None:
+            return None
+        image = np.frombuffer(camera_data, np.uint8).reshape((cam.getHeight(), cam.getWidth(), 4))
+        return image[:, :, :-1]
+    
+    def get_water_camera_image(self):
+        cam = self.water_camera
+        camera_data = cam.getImage()
+        if camera_data is None:
+            return None
+        image = np.frombuffer(camera_data, np.uint8).reshape((cam.getHeight(), cam.getWidth(), 4))
+        return image[:, :, :-1]
 
     def get_gps_values(self):
         reading = self.gps.getValues()
-        # noise = numpy.random.normal(loc=0, scale=0.00001, size=2)
-        # reading[0] += noise[0]
-        # reading[1] += noise[1]
-        #print("GPS: {}".format(reading))
         return reading
 
     # Returns the counter-clockwise angle in the range [-π, π] that the boat

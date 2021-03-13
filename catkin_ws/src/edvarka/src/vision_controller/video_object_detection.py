@@ -1,0 +1,125 @@
+#! /usr/bin/python3
+
+import numpy as np
+import cv2
+import time
+import sys
+import os
+
+import rospy
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
+
+from object_detection_utils import *
+from camera_feedback_control import *
+
+OBJECT_EXIST_RATE = 0.5
+timeout = 10
+front_image = None
+water_image = None
+bridge = CvBridge()
+
+def image_object_detect(img_base,img_obj):
+    # get segmentated image
+    seg_img = segment_object(img_base,img_obj)
+    cv2.imshow("cv2_seg",seg_img)
+    cv2.waitKey(1)
+    obj_img = get_main_object(seg_img)
+    # detect object exist or not
+    obj_exist = object_exist(obj_img)
+    return obj_exist
+
+def update_front_image(img):
+    global bridge, front_image
+    front_image = bridge.imgmsg_to_cv2(img)
+    # cv2.imshow("cv2_front", front_image)
+    # cv2.waitKey(1)
+
+def update_water_image(img):
+    global bridge, water_image
+    water_image = bridge.imgmsg_to_cv2(img)
+    # cv2.imshow("cv2_back", water_image)
+    # cv2.waitKey(1)
+
+# look at the image for timeout sec, and judge whether there is object or not
+def video_object_detect(rate, show=True):
+    global water_image, front_image
+    # initialization
+    obj_exist_rates = []
+    start = time.time()
+
+    while True:
+        rate.sleep()
+        # camera for getting base image of the water surface without object
+        frame_base = water_image
+        # camera for getting the image of object floating on the water surface
+        frame_object = front_image
+
+        if frame_base is None or frame_object is None:
+            continue
+
+        # get segmentated image
+        seg_img = segment_object(frame_base, frame_object)
+        obj_img = get_main_object(seg_img)
+        # detect object exist or not
+        obj_exist = object_exist(obj_img)
+        obj_exist_rates.append(obj_exist)
+
+        # ploting the object detection process
+        if show:
+            showImg = cv2.resize(frame_object,IMG_SIZE)
+            base_img = cv2.resize(frame_base,IMG_SIZE)
+            # show
+            cv2.imshow('window1', showImg)
+            cv2.imshow('window2', obj_img)
+            cv2.imshow('window3', base_img)
+        else:
+            pass
+
+        # quit with ESC
+        if cv2.waitKey(30) & 0xff == 27:
+            break
+
+        # quit with timeout
+        if time.time() - start > timeout:
+            break
+
+        # prepare for next frame
+        end_flag_base, frame_base = cap_base.read()
+        end_flag_object, frame_object = cap_object.read()
+    
+    # calculate what is the rate of the object detected and decide whether object exist or not
+    exists_rate = sum(obj_exist_rates) / len(obj_exist_rates)
+    return True if exists_rate > OBJECT_EXIST_RATE else False
+
+if __name__ == '__main__':
+    rospy.init_node(name="object_detection_node")
+    rate = rospy.Rate(10) # Hz
+    front_image_sub = rospy.Subscriber("/front_camera_view", Image, queue_size=1, callback=update_front_image)
+    water_image_sub = rospy.Subscriber("/water_camera_view", Image, queue_size=1, callback=update_water_image)
+    
+    while not rospy.is_shutdown():
+        if front_image is not None and water_image is not None:
+            if image_object_detect(water_image, front_image):
+                print("Object found!")
+            else:
+                print("No object detected...")
+        rate.sleep()
+
+
+
+    # if sys.argv[1]=="camera":
+    #     # use camera
+    #     cap1 = cv2.VideoCapture(0)
+    #     cap2 = cv2.VideoCapture(1)
+    # else:
+    #     # get video object
+    #     cap1 = cv2.VideoCapture(sys.argv[1])
+    #     cap2 = cv2.VideoCapture(sys.argv[2])
+    # # run object detecter
+    # exist = video_object_detect(cap1,cap2)
+    # print("Object Exist or not:",exist)
+    # # finish
+    # cv2.destroyAllWindows()
+    # cap1.release()
+    # cap2.release()
