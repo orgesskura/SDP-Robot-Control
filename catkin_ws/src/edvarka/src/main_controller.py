@@ -10,6 +10,7 @@ import threading
 from controller import Robot
 import rospy
 import tf
+from std_msgs.msg import Bool, Float64
 from sensor_msgs.msg import Imu, NavSatFix, Image
 from geometry_msgs.msg import Vector3, PoseWithCovarianceStamped, Quaternion
 from nav_msgs.msg import Odometry
@@ -34,6 +35,8 @@ class main_controller:
         self.water_image_pub = rospy.Publisher("/water_camera_view", Image, queue_size=1)
         # subscribers
         self.robot_state_sub = rospy.Subscriber("/map_prediction", Odometry, callback=self.update_robot_state)
+        self.is_object_detected_sub = rospy.Subscriber("/is_object_detected", Bool, callback=self.update_is_object_detected)
+        self.object_dist_from_center_sub = rospy.Subscriber("/object_dist_from_center", Float64, callback=self.update_object_dist_from_center)
 
         self.init_time = rospy.Time.now()
         # create the Robot instance.
@@ -57,6 +60,17 @@ class main_controller:
         self.image_read_rate = rospy.Rate(10) # Hz
         self.image_read_thread = threading.Thread(target=self.publish_camera_images, daemon=True)
         self.image_read_thread.start()
+        # setup object detection variables
+        self.is_object_detected = False
+        self.object_dist_from_center = None
+    
+    def update_is_object_detected(self, is_object_detected):
+        self.is_object_detected = is_object_detected.data
+        if not self.is_object_detected:
+            self.object_dist_from_center = None
+        
+    def update_object_dist_from_center(self, dist):
+        self.object_dist_from_center = dist.data
     
     def update_robot_state(self, state):
         # state is of type Odometry
@@ -199,6 +213,8 @@ class main_controller:
         # else:
         #     self.rm.close_arms()
         # self.rm.goto_xy(rubbish_pos)
+        if self.is_object_detected:
+            print("Object distance from image center: {}".format(self.object_dist_from_center))
         self.robot.step(self.timestep)
         self.send_sensor_readings_to_localization()
 

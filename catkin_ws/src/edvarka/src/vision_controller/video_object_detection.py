@@ -7,6 +7,7 @@ import sys
 import os
 
 import rospy
+from std_msgs.msg import Float64, Bool
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 
@@ -18,20 +19,25 @@ timeout = 10
 front_image = None
 water_image = None
 bridge = CvBridge()
+object_center = None
 
 def image_object_detect(img_base,img_obj):
+    global object_center
     # get segmentated image
     seg_img = segment_object(img_base,img_obj)
-    cv2.imshow("cv2_seg",seg_img)
+    img_with_contour, main_obj_contour = get_main_object(seg_img)
+    cv2.imshow("obj_image", img_with_contour)
     cv2.waitKey(1)
-    obj_img = get_main_object(seg_img)
     # detect object exist or not
-    obj_exist = object_exist(obj_img)
+    obj_exist = object_exist(main_obj_contour)
+    if obj_exist:
+        object_center = get_object_center(main_obj_contour)
     return obj_exist
 
 def update_front_image(img):
     global bridge, front_image
     front_image = bridge.imgmsg_to_cv2(img)
+    cv2.imwrite("/home/tsioftas/Uni/Y3/SDP/SDP-Robot-Control/front.png", front_image)
     # cv2.imshow("cv2_front", front_image)
     # cv2.waitKey(1)
 
@@ -97,13 +103,19 @@ if __name__ == '__main__':
     rate = rospy.Rate(10) # Hz
     front_image_sub = rospy.Subscriber("/front_camera_view", Image, queue_size=1, callback=update_front_image)
     water_image_sub = rospy.Subscriber("/water_camera_view", Image, queue_size=1, callback=update_water_image)
+    is_object_detected_pub = rospy.Publisher("/is_object_detected", Bool, queue_size=1)
+    object_dist_from_center_pub = rospy.Publisher("/object_dist_from_center", Float64, queue_size=1)
     
     while not rospy.is_shutdown():
         if front_image is not None and water_image is not None:
             if image_object_detect(water_image, front_image):
                 print("Object found!")
+                is_object_detected_pub.publish(True)
+                dist = get_Horizontal_gap(object_center)
+                object_dist_from_center_pub.publish(dist)
             else:
                 print("No object detected...")
+                is_object_detected_pub.publish(False)
         rate.sleep()
 
 

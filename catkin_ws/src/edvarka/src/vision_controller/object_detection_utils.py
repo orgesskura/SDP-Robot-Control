@@ -4,7 +4,7 @@ import numpy as np
 # high parameters
 IMG_SIZE = (256,256)
 X_CENTER = int(256//2)
-OBJECT_THRESH = int((256*256) * 0.05)
+OBJECT_THRESH = int((256*256) * 0.0005)
 
 ################################################################################################
 # object segmentation functions
@@ -48,14 +48,21 @@ def segment_object(base_img,obj_img):
 
 # filter the segmented image
 def get_main_object(seg_img):
-    imge = cv2.erode(seg_img,np.ones((1,1),np.uint8))
-    return imge
+    seg_img = seg_img.astype(np.uint8)
+    contours = cv2.findContours(seg_img,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)[0]
+    if len(contours) == 0:
+        return seg_img, None
+    max_seg_idx = np.argmax([cv2.contourArea(c) for c in contours])
+    max_seg = contours[max_seg_idx]
+    seg_img = cv2.drawContours(seg_img, max_seg, -1, (0, 0, 128), -1)
+    return seg_img, max_seg
 
 # decide object exist or not from segmented image
-def object_exist(seg_img):
-    pixels = seg_img.reshape(-1)
-    print(pixels)
-    white_pixels_num = len([p for p in pixels if p == 255])
+def object_exist(main_object):
+    if main_object is None:
+        return False
+    white_pixels_num = cv2.contourArea(main_object)
+    print(white_pixels_num)
     return True if white_pixels_num > OBJECT_THRESH else False
 
 ################################################################################################
