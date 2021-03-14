@@ -20,7 +20,7 @@ from my_navsat_transform import my_navsat_transform
 from hardware_interface import hardware_interface
 from robot_movement import robot_movement
 import utils
-from WebAppFirebase import updateDatabase
+from WebAppFirebase import updateDatabase, getTargetCoordinatesFromDatabase
 
 class main_controller:
 
@@ -38,6 +38,7 @@ class main_controller:
         self.robot_state_sub = rospy.Subscriber("/map_prediction", Odometry, callback=self.update_robot_state)
         self.is_object_detected_sub = rospy.Subscriber("/is_object_detected", Bool, callback=self.update_is_object_detected)
         self.object_dist_from_center_sub = rospy.Subscriber("/object_dist_from_center", Float64, callback=self.update_object_dist_from_center)
+        self.object_size_sub = rospy.Subscriber("/object_size", Float64, callback=self.update_object_size)
 
         self.init_time = rospy.Time.now()
         # create the Robot instance.
@@ -64,35 +65,57 @@ class main_controller:
         # setup object detection variables
         self.is_object_detected = False
         self.object_dist_from_center = None
+        self.object_size = None
         
         # battery
         self.battery_level = 100
 
-        # setup server data uploader
-        self.data_send_rate = rospy.Rate(1/5) # Hz
-        self.data_send_thread = threading.Thread(target=self.send_data_to_server, daemon=True)
-        self.data_send_thread.start()
+        # setup server communication
+        self.server_comm_rate = rospy.Rate(1/5) # Hz
+        self.server_comm_thread = threading.Thread(target=self.communicate_with_server, daemon=True)
+        self.server_comm_thread.start()
 
         # path planning
+        self.autonomous_mode = True # default should be True?
+        self.path = [ utils.xy_position(6,0),
+                      utils.xy_position(6,6),
+                      utils.xy_position(0,6),
+                      utils.xy_position(-6,6),
+                      utils.xy_position(-6,0),
+                      utils.xy_position(-6,-6),
+                      utils.xy_position(0,-6),
+                      utils.xy_position(6,-6) ]
+        self.path_pos = 0
 
     
-    def send_data_to_server(self):
+    def communicate_with_server(self):
         while True:
-            self.data_send_rate.sleep()
+            self.server_comm_rate.sleep()
             gps_reading = self.hi.get_gps_values()
             long_lat_pos = utils.longlat_position(gps_reading[1], gps_reading[0])
             battery = self.battery_level
             if long_lat_pos is None or battery is None:
                 continue
             updateDatabase(long_lat_pos, battery)
+            if self.autonomous_mode == False:
+                longlat_targ = getTargetCoordinatesFromDatabase()
+                if self.my_navsat_transform.origin is not None:
+                    xy_targ = self.my_navsat_transform.longlat_to_xy(longlat_targ)
+                    print("target (x,y): ({},{})".format(xy_targ.x, xy_targ.y))
+                    self.path = [xy_targ]
+                    self.path_pos = 0
     
     def update_is_object_detected(self, is_object_detected):
         self.is_object_detected = is_object_detected.data
         if not self.is_object_detected:
             self.object_dist_from_center = None
+            self.object_size = None
         
     def update_object_dist_from_center(self, dist):
         self.object_dist_from_center = dist.data
+    
+    def update_object_size(self, size):
+        self.object_size = size.data
     
     def update_robot_state(self, state):
         # state is of type Odometry
@@ -229,15 +252,31 @@ class main_controller:
 
     
     def main_loop(self):
+
+        next_position = self.path[self.path_pos]
+        if self.is_object_detected:
+            if self.rm.is_scanning:
+                self.rm.is_scanning = False
+            self.rm.goto_object(self.object_dist_from_center, self.object_size)
+            self.rm.open_arms()
+        else:
+            self.rm.close_arms()
+            if self.rm.is_at(next_position) or self.rm.is_scanning:
+                if self.rm.scan():
+                    pass
+                else:
+                    self.path_pos += 1
+                    if self.path_pos >= len(self.path):
+                        self.path_pos = 0
+            else:
+                self.rm.goto_xy(self.path[self.path_pos])
+
         # rubbish_pos = utils.xy_position(3,3)
         # if self.rm.is_in_arms_open_distance(rubbish_pos):
         #     self.rm.open_arms()
         # else:
         #     self.rm.close_arms()
         # self.rm.goto_xy(rubbish_pos)
-        if self.is_object_detected:
-            self.rm.face_object_vision(self.object_dist_from_center)
-            print("Object distance from image center: {}".format(self.object_dist_from_center))
         self.robot.step(self.timestep)
         self.send_sensor_readings_to_localization()
 

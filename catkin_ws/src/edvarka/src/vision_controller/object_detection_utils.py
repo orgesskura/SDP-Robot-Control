@@ -4,7 +4,7 @@ import numpy as np
 # high parameters
 IMG_SIZE = (256,256)
 X_CENTER = int(256//2)
-OBJECT_THRESH = int((256*256) * 0.00005)
+OBJECT_THRESH = int((256*256) * 0.000005)
 
 ################################################################################################
 # object segmentation functions
@@ -27,7 +27,9 @@ def image_subtraction(img1,img2):
 
 # method to segment image using threshold
 def binarization(img):
-    t = 30
+    cv2.imshow("view", img)
+    cv2.waitKey(1)
+    t = 50
     red = img[:,:,2] < t
     green = img[:,:,1] < t
     blue = img[:,:,0] < t
@@ -60,10 +62,9 @@ def get_main_object(seg_img):
 # decide object exist or not from segmented image
 def object_exist(main_object):
     if main_object is None:
-        return False
+        return (False, None)
     white_pixels_num = cv2.contourArea(main_object)
-    print(white_pixels_num)
-    return True if white_pixels_num > OBJECT_THRESH else False
+    return (True, white_pixels_num) if white_pixels_num > OBJECT_THRESH else (False, None)
 
 ################################################################################################
 # object position detection functions
