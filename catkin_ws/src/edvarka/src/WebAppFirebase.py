@@ -31,10 +31,14 @@ def updateDatabase(long_lat_pos, battery):
 	longitude = long_lat_pos.longitude + offset.longitude
 	
 	# Update the database
-	db.child("Test").update({"Battery": battery})
-	db.child("Test").child("Location").update({"Latitude": latitude})
-	db.child("Test").child("Location").update({"Longitude": longitude})
-
+	print("data: ",latitude, longitude)
+	try:
+		db.child("Test").update({"Battery": battery})
+		db.child("Test").child("Location").update({"Latitude": latitude})
+		db.child("Test").child("Location").update({"Longitude": longitude})
+	except Exception as e:
+		print(e)
+		
 def getTargetCoordinatesFromDatabase():
 	global offset
 	# Connect to database

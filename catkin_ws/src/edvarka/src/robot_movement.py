@@ -16,9 +16,9 @@ class robot_movement:
         self.MAX_ROT_V = 2
         self.ARMS_OPEN = 0
         self.ARMS_CLOSED = 1.5
-        self.OBJECT_FACING_THRESHOLD = 5
-        self.APPROACH_TRASH_VELOCITY = 1
-        self.SMALL_OBJ_THRESH = (256*256*0.0005) # 1/1000th of the image
+        self.OBJECT_FACING_THRESHOLD = 10
+        self.APPROACH_TRASH_VELOCITY = 1.2
+        self.SMALL_OBJ_THRESH = (256*256*0.00005) # 1/1000th of the image
         # PΙD controller for facing
         self.INCLUDE_I_TERM_THRESHOLD_F = math.radians(10)
         self.last_f_error = 0
@@ -35,7 +35,7 @@ class robot_movement:
         self.INCLUDE_I_TERM_THRESHOLD_V = 10
         self.last_v_error = 0
         self.v_Kp = 0.08
-        self.v_Kd = 1
+        self.v_Kd = 30
         self.v_Ki = 0
         # Timer for stable facing
         self.TIMER_DURATION = 10 # steps
@@ -146,6 +146,7 @@ class robot_movement:
             return
         error = object_pos_in_image
         error_derivative = (error - self.last_v_error) / self.hi.timestep
+        print("Derv: ", error_derivative)
         self.last_v_error = error
         error_integral = error * self.hi.timestep
         include_i_term = 0
