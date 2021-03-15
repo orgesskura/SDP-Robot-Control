@@ -23,7 +23,7 @@ class robot_movement:
         self.INCLUDE_I_TERM_THRESHOLD_F = math.radians(20)
         self.last_f_error = 0
         self.f_Kp = 2.3
-        self.f_Kd = 200
+        self.f_Kd = 100
         self.f_Ki = 0.2
         # PID controller for travelling
         self.INCLUDE_I_TERM_THRESHOLD_T = 0.4
