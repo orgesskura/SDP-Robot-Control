@@ -20,11 +20,14 @@ from my_navsat_transform import my_navsat_transform
 from hardware_interface import hardware_interface
 from robot_movement import robot_movement
 import utils
-from WebAppFirebase import updateDatabase
+from WebAppFirebase import updateDatabase, getTargetCoordinatesFromDatabase
+#navigation
+import navigation.CentroidUpdate as centroidUpdate
+import navigation.FirstJourney as firstJourney
 
 class main_controller:
 
-    def __init__(self):
+    def __init__(self, lochEdge, numberOfStops, lochName):
         # initialize ros node
         rospy.init_node("main_controller")
         # publishers
@@ -38,6 +41,7 @@ class main_controller:
         self.robot_state_sub = rospy.Subscriber("/map_prediction", Odometry, callback=self.update_robot_state)
         self.is_object_detected_sub = rospy.Subscriber("/is_object_detected", Bool, callback=self.update_is_object_detected)
         self.object_dist_from_center_sub = rospy.Subscriber("/object_dist_from_center", Float64, callback=self.update_object_dist_from_center)
+        self.object_size_sub = rospy.Subscriber("/object_size", Float64, callback=self.update_object_size)
 
         self.init_time = rospy.Time.now()
         # create the Robot instance.
@@ -56,43 +60,95 @@ class main_controller:
         # initialize navsat transform
         self.my_navsat_transform = my_navsat_transform()
 
+        # setup object detection variables
+        self.is_object_detected = False
+        self.object_dist_from_center = None
+        self.object_size = None
+        
+        # battery
+        self.battery_level = 100
+
+        # path planning
+        self.lochEdge = lochEdge
+        self.lochName = lochName
+        self.numberOfStops = numberOfStops
+        position = None
+        gps_reading = [None, None]
+        while gps_reading[0] is None or gps_reading[1] is None or math.isnan(gps_reading[0]) or math.isnan(gps_reading[1]):
+            gps_reading = self.hi.get_gps_values()
+            self.robot.step(self.timestep)
+        position = utils.longlat_position(gps_reading[1], gps_reading[0])
+        
+        self.startingLong = position.longitude
+        self.startingLat = position.latitude
+        self.itter = 0 # This is the number of itterations of the lake that EdVarka has done 
+        self.autonomous_mode = True # default should be True?
+        self.firstPath = firstJourney.firstJourney(self.lochEdge, self.numberOfStops, self.startingLong, self.startingLat, self.lochName) # This will give us a set of points to visit
+        self.startingPos = position # Starting position
+        self.trashFound = []
+
+        self.autonomous_mode = True # default should be True?
+        # self.path = [ utils.xy_position(6,0),
+        #               utils.xy_position(6,6),
+        #               utils.xy_position(0,6),
+        #               utils.xy_position(-6,6),
+        #               utils.xy_position(-6,0),
+        #               utils.xy_position(-6,-6),
+        #               utils.xy_position(0,-6),
+        #               utils.xy_position(6,-6) ]
+        self.path = [self.startingPos] # Takes list of centroid coordinates and converts to utils xy_position
+        for cent in self.firstPath.centroidList:
+            self.path.append(utils.longlat_position(cent[0], cent[1]))
+        self.path.append(self.startingPos)
+        self.my_navsat_transform.set_origin(self.startingPos)
+        self.path_pos = 0
+        self.is_collecting_trash = False
+
+        # setup server communication
+        self.server_comm_rate = rospy.Rate(1/5) # Hz
+        self.server_comm_thread = threading.Thread(target=self.communicate_with_server, daemon=True)
+        self.server_comm_thread.start()
+
         # setup camera image reading stuff
         self.bridge = CvBridge()
         self.image_read_rate = rospy.Rate(20) # Hz
         self.image_read_thread = threading.Thread(target=self.publish_camera_images, daemon=True)
         self.image_read_thread.start()
-        # setup object detection variables
-        self.is_object_detected = False
-        self.object_dist_from_center = None
-        
-        # battery
-        self.battery_level = 100
 
-        # setup server data uploader
-        self.data_send_rate = rospy.Rate(1/5) # Hz
-        self.data_send_thread = threading.Thread(target=self.send_data_to_server, daemon=True)
-        self.data_send_thread.start()
-
-        # path planning
+        # ensure trash collection (etc)
+        self.is_etc = False
+        self.etc_timer = 0
+        self.ETC_TIMER_INIT = 30
 
     
-    def send_data_to_server(self):
+    def communicate_with_server(self):
         while True:
-            self.data_send_rate.sleep()
+            self.server_comm_rate.sleep()
             gps_reading = self.hi.get_gps_values()
             long_lat_pos = utils.longlat_position(gps_reading[1], gps_reading[0])
             battery = self.battery_level
             if long_lat_pos is None or battery is None:
                 continue
             updateDatabase(long_lat_pos, battery)
+            if self.autonomous_mode == False:
+                longlat_targ = getTargetCoordinatesFromDatabase()
+                if self.my_navsat_transform.origin is not None:
+                    xy_targ = self.my_navsat_transform.longlat_to_xy(longlat_targ)
+                    print("target (x,y): ({},{})".format(xy_targ.x, xy_targ.y))
+                    self.path = [xy_targ]
+                    self.path_pos = 0
     
     def update_is_object_detected(self, is_object_detected):
         self.is_object_detected = is_object_detected.data
         if not self.is_object_detected:
             self.object_dist_from_center = None
+            self.object_size = None
         
     def update_object_dist_from_center(self, dist):
         self.object_dist_from_center = dist.data
+    
+    def update_object_size(self, size):
+        self.object_size = size.data
     
     def update_robot_state(self, state):
         # state is of type Odometry
@@ -229,15 +285,73 @@ class main_controller:
 
     
     def main_loop(self):
+        # self.robot.step(self.timestep)
+        # self.send_sensor_readings_to_localization()
+        # return
+        print("Iteration: ", self.itter)
+        print("Position in path: ",self.path_pos)
+        next_position = self.my_navsat_transform.longlat_to_xy(self.path[self.path_pos])
+        if self.is_object_detected:
+            self.is_etc = False
+            print("Collecting trash...")
+            self.is_collecting_trash = True
+            if self.rm.is_scanning:
+                self.rm.is_scanning = False
+            self.rm.goto_object(self.object_dist_from_center, self.object_size)
+            self.rm.open_arms()
+        else:
+            if self.is_collecting_trash:
+                # Has collected trash
+                gps_reading = self.hi.get_gps_values() # improve on
+                position = utils.longlat_position(
+                    gps_reading[1],
+                    gps_reading[0]
+                )
+                self.trashFound.append(position)
+                self.is_collecting_trash = False
+                self.is_etc = True
+                self.etc_timer = self.ETC_TIMER_INIT
+            if self.is_etc:
+                self.rm.open_arms()
+                if self.etc_timer <= 0:
+                    print("finished etc")
+                    self.is_etc = False
+                    self.hi.set_left_propeller_velocity(0)
+                    self.hi.set_right_propeller_velocity(0)
+                else:
+                    print("etc-ing")
+                    self.etc_timer -= 1
+                    self.hi.set_left_propeller_velocity(self.rm.APPROACH_TRASH_VELOCITY)
+                    self.hi.set_right_propeller_velocity(self.rm.APPROACH_TRASH_VELOCITY)
+            else:
+                self.rm.close_arms()
+                if self.rm.is_at(next_position) or self.rm.is_scanning:
+                    if self.rm.scan():
+                        print("Scanning...")
+                        pass
+                    else:
+                        print("Next step in the path...")
+                        self.path_pos += 1
+                        if self.path_pos >= len(self.path):
+                            self.path_pos = 0
+                            self.itter+=1 # Update the itteration
+                            update = centroidUpdate.centroidUpdate(self.lochEdge, self.lochName, self.numberOfStops, self.itter, self.trashFound) # Updates the centroids to visit for the next journey
+                            self.path = [self.startingPos]
+                            for pt in update.centroidList: # Makes list of xy_positions
+                                self.path.append(utils.longlat_position(pt[0], pt[1]))
+                            self.path.append(self.startingPos)
+                            # Set back to empty list for next round of finding trash
+                            self.trashFound = []
+                else:
+                    print("moving towards next position: ",next_position)
+                    self.rm.goto_xy(next_position)
+
         # rubbish_pos = utils.xy_position(3,3)
         # if self.rm.is_in_arms_open_distance(rubbish_pos):
         #     self.rm.open_arms()
         # else:
         #     self.rm.close_arms()
         # self.rm.goto_xy(rubbish_pos)
-        if self.is_object_detected:
-            self.rm.face_object_vision(self.object_dist_from_center)
-            print("Object distance from image center: {}".format(self.object_dist_from_center))
         self.robot.step(self.timestep)
         self.send_sensor_readings_to_localization()
 
@@ -246,7 +360,7 @@ class main_controller:
 
 
 if __name__ == "__main__":
-    mc = main_controller()
+    mc = main_controller("StMargaretsEdge.geojson", 10, "StMargarets")
     while not rospy.is_shutdown():
         mc.main_loop()
 

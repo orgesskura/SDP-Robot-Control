@@ -5,10 +5,16 @@ class xy_position:
         self.x = x
         self.y = y
 
+    def __str__(self):
+        return "(x: {}, y: {})".format(self.x, self.y) 
+
 class longlat_position:
     def __init__(self, longitude, latitude):
         self.longitude = longitude
-        self.latitude = latitude        
+        self.latitude = latitude
+
+    def __str__(self):
+        return "(longitude: {}, latitude: {})".format(self.longitude, self.latitude) 
 
 # Returns the anti-clockwise angle from the y-axis of position1 to position2
 def get_yaw_xy(position1, position2):

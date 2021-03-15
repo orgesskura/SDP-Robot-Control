@@ -26,13 +26,14 @@ def image_object_detect(img_base,img_obj):
     # get segmentated image
     seg_img = segment_object(img_base,img_obj)
     img_with_contour, main_obj_contour = get_main_object(seg_img)
-    cv2.imshow("obj_image", img_with_contour)
-    cv2.waitKey(1)
+    # cv2.imshow("obj_image", img_with_contour)
+    # cv2.waitKey(1)
     # detect object exist or not
-    obj_exist = object_exist(main_obj_contour)
+    obj_exist, object_size = object_exist(main_obj_contour)
+    object_center = None
     if obj_exist:
         object_center = get_object_center(main_obj_contour)
-    return obj_exist
+    return (obj_exist, object_center, object_size)
 
 def update_front_image(img):
     global bridge, front_image
@@ -104,16 +105,18 @@ if __name__ == '__main__':
     water_image_sub = rospy.Subscriber("/water_camera_view", Image, queue_size=1, callback=update_water_image)
     is_object_detected_pub = rospy.Publisher("/is_object_detected", Bool, queue_size=1)
     object_dist_from_center_pub = rospy.Publisher("/object_dist_from_center", Float64, queue_size=1)
+    object_size_pub = rospy.Publisher("/object_size", Float64, queue_size=1)
     
     while not rospy.is_shutdown():
         if front_image is not None and water_image is not None:
-            if image_object_detect(water_image, front_image):
-                print("Object found!")
+            object_exists, object_center, object_size = image_object_detect(water_image, front_image)
+            if object_exists:
                 is_object_detected_pub.publish(True)
                 dist = get_Horizontal_gap(object_center)
                 object_dist_from_center_pub.publish(dist)
+                object_size_pub.publish(object_size)
             else:
-                print("No object detected...")
+                #print("No object detected...")
                 is_object_detected_pub.publish(False)
         rate.sleep()
 

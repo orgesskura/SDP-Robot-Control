@@ -16,6 +16,9 @@ class robot_movement:
         self.MAX_ROT_V = 2
         self.ARMS_OPEN = 0
         self.ARMS_CLOSED = 1.5
+        self.OBJECT_FACING_THRESHOLD = 10
+        self.APPROACH_TRASH_VELOCITY = 1.2
+        self.SMALL_OBJ_THRESH = (256*256*0.00005) # 1/1000th of the image
         # PΙD controller for facing
         self.INCLUDE_I_TERM_THRESHOLD_F = math.radians(10)
         self.last_f_error = 0
@@ -26,13 +29,13 @@ class robot_movement:
         self.INCLUDE_I_TERM_THRESHOLD_T = 0.4
         self.last_t_error = 0
         self.t_Kp = 1
-        self.t_Kd = 500
+        self.t_Kd = 300
         self.t_Ki = 0.1
         # PID controller for facing (using vision)
         self.INCLUDE_I_TERM_THRESHOLD_V = 10
         self.last_v_error = 0
         self.v_Kp = 0.08
-        self.v_Kd = 1
+        self.v_Kd = 30
         self.v_Ki = 0
         # Timer for stable facing
         self.TIMER_DURATION = 10 # steps
@@ -42,7 +45,12 @@ class robot_movement:
         self.robot_state = None
         self.DEFAULT_POSITION = utils.xy_position(0,0)
         self.DEFAULT_YAW = 0
-    
+        # scan
+        self.is_scanning = False
+        self.scan_end_yaw = 0
+        self.scan_target_list = []
+        self.scan_target = None
+
     # Returns the robot's current estimate of its position on the xy plane
     # as a utils.xy_position object
     def get_own_position(self):
@@ -75,9 +83,8 @@ class robot_movement:
     def get_angle_to_yaw(self, target_yaw):
         own_yaw = self.get_own_yaw()
         ret = target_yaw - own_yaw
-        print("Yaw: {}\nAngle to: {}".format(own_yaw, ret))
         # answer must be between -π and π
-        while ret < math.pi:
+        while ret < -math.pi:
             ret += 2*math.pi
         while ret > math.pi:
             ret -= 2*math.pi
@@ -103,8 +110,8 @@ class robot_movement:
     # Returns true if the robot is facing in the desired direction within
     # the acceptable error.
     def is_facing_yaw(self, target_yaw):
-        error = target_yaw - self.get_own_yaw()
-        return error < self.FACING_THRESHOLD
+        error = self.get_angle_to_yaw(target_yaw)
+        return abs(error) < self.FACING_THRESHOLD
     
     # Adjusts the speed of the propellers using a PID controller in order to
     # achieve the goal of the boat facing the target position.
@@ -118,7 +125,6 @@ class robot_movement:
     # from north (y-axis)).
     def face_yaw(self, target_yaw):
         error = self.get_angle_to_yaw(target_yaw)
-        print("face error: {}".format(error))
         error_derivative = (error - self.last_f_error) / self.hi.timestep
         self.last_f_error = error
         error_integral = error * self.hi.timestep
@@ -140,6 +146,7 @@ class robot_movement:
             return
         error = object_pos_in_image
         error_derivative = (error - self.last_v_error) / self.hi.timestep
+        print("Derv: ", error_derivative)
         self.last_v_error = error
         error_integral = error * self.hi.timestep
         include_i_term = 0
@@ -200,6 +207,51 @@ class robot_movement:
             self.timer -= 1
         else:
             self.move_towards(target_position)
+    
+    def is_facing_object(self, object_center_distance, object_size):
+        if object_size < self.SMALL_OBJ_THRESH:
+            # for really small/far away objects, rotating might throw them off the
+            # detection threshold
+            return True
+        return abs(object_center_distance) < self.OBJECT_FACING_THRESHOLD
+
+    def goto_object(self, object_center_distance, object_size):
+        if object_center_distance is None or object_size is None:
+            return
+        if not self.is_facing_object(object_center_distance, object_size):
+            self.is_timing = False
+            self.face_object_vision(object_center_distance)
+        elif not self.is_timing:
+            self.is_timing = True
+            self.timer = self.TIMER_DURATION # steps
+        elif self.timer != 0:
+            self.timer -= 1
+        else:
+            self.hi.set_left_propeller_velocity(self.APPROACH_TRASH_VELOCITY)
+            self.hi.set_right_propeller_velocity(self.APPROACH_TRASH_VELOCITY)
+    
+    def scan(self):
+        if not self.is_scanning:
+            self.is_scanning = True
+            own_yaw = self.get_own_yaw()
+            self.scan_target_list = [own_yaw + offset for offset in [math.pi/2, math.pi, 3*math.pi/2, 0]]
+            for i, targ in enumerate(self.scan_target_list):
+                if targ > math.pi:
+                    self.scan_target_list[i] = targ-2*math.pi
+                if targ < -math.pi:
+                    self.scan_target_list[i] = targ+2*math.pi
+            self.scan_target = 0
+        target_yaw = self.scan_target_list[self.scan_target]
+        if self.is_facing_yaw(target_yaw):
+            self.scan_target += 1
+            if self.scan_target >= len(self.scan_target_list):
+                self.is_scanning = False
+                return False
+        else:
+            self.face_yaw(self.scan_target_list[self.scan_target])
+        return True
+
+        
         
     def open_arms(self):
         self.hi.set_arms_position(self.ARMS_OPEN)

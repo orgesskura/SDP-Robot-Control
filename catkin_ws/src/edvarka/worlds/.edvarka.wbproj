@@ -8,5 +8,5 @@ renderingMode: PLAIN
 orthographicViewHeight: 1
 textFiles: -1
 consoles: Console:All:All
-renderingDevicePerspectives: edvarka:front_camera;1;0.992188;0;0.430912
-renderingDevicePerspectives: edvarka:water_camera;1;0.980469;0;0
+renderingDevicePerspectives: edvarka:front_camera;1;0.847656;0;0.228873
+renderingDevicePerspectives: edvarka:water_camera;1;0.492188;0;0

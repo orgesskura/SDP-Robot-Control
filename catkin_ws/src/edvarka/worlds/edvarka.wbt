@@ -3,8 +3,8 @@ WorldInfo {
   gpsCoordinateSystem "WGS84"
 }
 Viewpoint {
-  orientation -0.8197938659225121 0.2888047287289703 0.49449959156667483 5.114572934415647
-  position -2.3626424234073924 -2.033662520911005 2.9444920943308825
+  orientation 0.03305555260610059 0.724496650717512 0.68848524569595 3.105079104978505
+  position -0.029025338721233734 0.7341496768300586 0.480735234264632
 }
 DEF NORTH_POINTER Solid {
   translation 0 12.23 0
@@ -24,7 +24,8 @@ DEF NORTH_POINTER Solid {
 TexturedBackground {
   reflections FALSE
 }
-TexturedBackgroundLight {
+DirectionalLight {
+  intensity 2.5
 }
 DEF STILL_WATER Fluid {
   translation 0 0 0.25
@@ -36,6 +37,8 @@ DEF STILL_WATER Fluid {
         transparency 0.2
         roughness 1
         metalness 0
+        IBLStrength 0
+        normalMapFactor 0
         emissiveColor 0.0453346 0.0764935 0.4
       }
       geometry Cylinder {
@@ -59,8 +62,9 @@ DEF SWIMMING_POOL_BOTTOM Transform {
     Shape {
       appearance DEF DARK_BROWN PBRAppearance {
         baseColor 0.501961 0.337255 0.2
-        roughness 1.1102230246251565e-16
+        roughness 1
         metalness 0
+        emissiveIntensity 0
       }
       geometry Cylinder {
         height 0.02
@@ -71,12 +75,12 @@ DEF SWIMMING_POOL_BOTTOM Transform {
   ]
 }
 DEF EdVarka Robot {
-  translation -0.00016970179392019474 -0.0006876197921855745 0.43748895591913634
-  rotation 0.0024833277085953855 -0.02388496943552375 -0.9997116290803844 3.0768513772426527
+  translation -0.000168756 -0.000697801 0.487
+  rotation 0.002505241418301667 -0.024602374756258902 -0.9996941766969479 3.076851121863551
   children [
     Camera {
-      translation -0.0100005 0.245167 0.119297
-      rotation 1 0 0 1.0472
+      translation 0.16 0 0.089297
+      rotation 0 1 0 -0.523595307179586
       children [
         Transform {
           rotation 1 0 0 1.5708
@@ -98,7 +102,7 @@ DEF EdVarka Robot {
     }
     Camera {
       translation -0.00999973 -0.238492 0.132954
-      rotation -1.272895005449756e-06 -0.5523350083134592 -0.8336222397403699 3.1401452508947916
+      rotation -2.5062292787148364e-09 0.5226868495723145 0.8525247546459686 3.14159
       children [
         Transform {
           rotation 1 0 0 1.5708
@@ -164,18 +168,19 @@ DEF EdVarka Robot {
       boundingObject Group {
         children [
           Transform {
-            translation -4.81 1.8 -4.13
+            translation -4.81 1.13 -9.33931
+            rotation 1 0 0 0.03
             children [
               Box {
-                size 15 50 1
+                size 20 55 5
               }
             ]
           }
           Transform {
-            translation -4.81 26.49 0.03
+            translation -4.81 27.08 -0.36
             children [
               Box {
-                size 15 1 8
+                size 20 5 12
               }
             ]
           }
@@ -183,6 +188,7 @@ DEF EdVarka Robot {
       }
       physics Physics {
         density 10
+        mass 2000000
       }
     }
     Gyro {
@@ -213,7 +219,7 @@ DEF EdVarka Robot {
     }
     DEF RIGHT_ARM HingeJoint {
       jointParameters HingeJointParameters {
-        position 1.4129837749665115
+        position 1.4129849557224434
         axis 0 0 1
         anchor -0.16 -0.22 0.08
       }
@@ -225,8 +231,8 @@ DEF EdVarka Robot {
         }
       ]
       endPoint Solid {
-        translation -0.0971561932404608 -0.270504019166495 0.030000000000000117
-        rotation 0 0 1 1.4129837749665115
+        translation -0.09715613360758439 -0.2705039449632622 0.030000000000000124
+        rotation 0 0 0.9999999999999999 1.4129849557224436
         children [
           Solid {
             rotation 1 0 0 0.261799
@@ -261,24 +267,22 @@ DEF EdVarka Robot {
         ]
         name "<STL_BINARY>(4)"
         boundingObject Transform {
-          translation -0.015 -0.0273206 0.00732053
+          translation -0.015 -0.0173206 -0.01
           rotation -1 0 0 -0.523595307179586
           children [
             Box {
-              size 0.01 0.1 0.04
+              size 0.01 0.2 0.2
             }
           ]
         }
         physics Physics {
           mass 0.2
         }
-        linearVelocity -0.0010281074778823028 -0.001251209085324593 4.828280385275714e-05
-        angularVelocity -0.00011753058235681958 0.0007605061197503021 0.015976653933033116
       }
     }
     DEF LEFT_ARM HingeJoint {
       jointParameters HingeJointParameters {
-        position 1.4125878282284339
+        position 1.4125889860988323
         axis 0 0 -1
         anchor 0.14 -0.22 0.08
       }
@@ -290,8 +294,8 @@ DEF EdVarka Robot {
         }
       ]
       endPoint Solid {
-        translation 0.07402520841166078 -0.25077867565174394 0.029999999999999874
-        rotation 0 0 -1 1.4125878282284339
+        translation 0.07402517277398758 -0.25077859926146506 0.02999999999999988
+        rotation 0 0 -1 1.4125889860988323
         children [
           Solid {
             rotation 1 0 0 0.261799
@@ -326,19 +330,17 @@ DEF EdVarka Robot {
         ]
         name "<STL_BINARY>"
         boundingObject Transform {
-          translation 0.03 -0.0273206 0.0073205
+          translation 0.03 -0.0173206 -0.01
           rotation 1 0 0 0.523599
           children [
             Box {
-              size 0.01 0.1 0.04
+              size 0.01 0.2 0.2
             }
           ]
         }
         physics Physics {
           mass 0.2
         }
-        linearVelocity 0.001117513138156723 -0.0011236216766481884 5.636090244649944e-05
-        angularVelocity 9.062623361189259e-05 -0.000760841632902362 -0.01598468085430084
       }
     }
     DEF L_FL Solid {
@@ -596,8 +598,6 @@ DEF EdVarka Robot {
     }
   }
   controller "<extern>"
-  linearVelocity -7.712995692089886e-06 0.00020494359866324408 -1.0026654703639283e-05
-  angularVelocity -1.2750408759575092e-05 -1.533460004237294e-07 -3.6787214070978995e-06
 }
 SolidPipe {
   translation 0 0 0.25
@@ -606,14 +606,14 @@ SolidPipe {
   radius 12
   thickness 1
   appearance PBRAppearance {
-    baseColor 0.5 0.33 0.2
+    baseColor 0 0.501961 1
     roughness 0.5
     metalness 0
   }
 }
 DEF BOTTLE Robot {
-  translation 0.186635 1.47113 0.43743231795318616
-  rotation 0.8111369524920828 0.38113472432973666 -0.4436137579155453 8.161223148394591e-05
+  translation 6 -1.73 0.4374354862956118
+  rotation 0.8111370212951763 0.3811346621488364 -0.4436136855340253 8.161224479950007e-05
   children [
     GPS {
     }
@@ -671,9 +671,309 @@ DEF BOTTLE Robot {
   }
   controller ""
 }
+DEF BOTTLE Robot {
+  translation -6.43993 5.10033 0.5182131200000001
+  rotation 0.8111369524920831 0.3811347243297367 -0.4436137579155453 8.16122314839459e-05
+  children [
+    GPS {
+    }
+    Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.541176 0.886275 0.203922
+            roughness 0.5
+            roughnessMap ImageTexture {
+              url [
+                "textures/plastic.jpg"
+              ]
+            }
+            metalness 0
+          }
+          geometry Capsule {
+            height 0.07
+            radius 0.02
+          }
+          castShadows FALSE
+        }
+      ]
+      immersionProperties [
+        ImmersionProperties {
+          fluidName "swimming pool"
+        }
+      ]
+      boundingObject Capsule {
+        height 0.07
+        radius 0.02
+        subdivision 16
+      }
+      physics Physics {
+        density 800
+        damping Damping {
+          linear 1
+          angular 1
+        }
+      }
+    }
+  ]
+  name "bottle_trash(1)"
+  immersionProperties [
+    ImmersionProperties {
+      fluidName "swimming pool"
+    }
+  ]
+  physics Physics {
+    mass 0.01
+    damping Damping {
+      linear 1
+      angular 1
+    }
+  }
+  controller ""
+}
+DEF BOTTLE Robot {
+  translation -5.27 -7.07983 0.61734712
+  rotation 0.8111369524920831 0.3811347243297367 -0.4436137579155453 8.16122314839459e-05
+  children [
+    GPS {
+    }
+    Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.541176 0.886275 0.203922
+            roughness 0.5
+            roughnessMap ImageTexture {
+              url [
+                "textures/plastic.jpg"
+              ]
+            }
+            metalness 0
+          }
+          geometry Capsule {
+            height 0.07
+            radius 0.02
+          }
+          castShadows FALSE
+        }
+      ]
+      immersionProperties [
+        ImmersionProperties {
+          fluidName "swimming pool"
+        }
+      ]
+      boundingObject Capsule {
+        height 0.07
+        radius 0.02
+        subdivision 16
+      }
+      physics Physics {
+        density 800
+        damping Damping {
+          linear 1
+          angular 1
+        }
+      }
+    }
+  ]
+  name "bottle_trash(2)"
+  immersionProperties [
+    ImmersionProperties {
+      fluidName "swimming pool"
+    }
+  ]
+  physics Physics {
+    mass 0.01
+    damping Damping {
+      linear 1
+      angular 1
+    }
+  }
+  controller ""
+}
+DEF BOTTLE Robot {
+  translation 6.29999 -7.33 0.71698512
+  rotation 0.8111369524920831 0.3811347243297367 -0.4436137579155453 8.16122314839459e-05
+  children [
+    GPS {
+    }
+    Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.541176 0.886275 0.203922
+            roughness 0.5
+            roughnessMap ImageTexture {
+              url [
+                "textures/plastic.jpg"
+              ]
+            }
+            metalness 0
+          }
+          geometry Capsule {
+            height 0.07
+            radius 0.02
+          }
+          castShadows FALSE
+        }
+      ]
+      immersionProperties [
+        ImmersionProperties {
+          fluidName "swimming pool"
+        }
+      ]
+      boundingObject Capsule {
+        height 0.07
+        radius 0.02
+        subdivision 16
+      }
+      physics Physics {
+        density 800
+        damping Damping {
+          linear 1
+          angular 1
+        }
+      }
+    }
+  ]
+  name "bottle_trash(3)"
+  immersionProperties [
+    ImmersionProperties {
+      fluidName "swimming pool"
+    }
+  ]
+  physics Physics {
+    mass 0.01
+    damping Damping {
+      linear 1
+      angular 1
+    }
+  }
+  controller ""
+}
+DEF BOTTLE Robot {
+  translation 7.27 2.67 0.8176261200000001
+  rotation 0.8111369524920831 0.3811347243297367 -0.4436137579155453 8.16122314839459e-05
+  children [
+    GPS {
+    }
+    Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.541176 0.886275 0.203922
+            roughness 0.5
+            roughnessMap ImageTexture {
+              url [
+                "textures/plastic.jpg"
+              ]
+            }
+            metalness 0
+          }
+          geometry Capsule {
+            height 0.07
+            radius 0.02
+          }
+          castShadows FALSE
+        }
+      ]
+      immersionProperties [
+        ImmersionProperties {
+          fluidName "swimming pool"
+        }
+      ]
+      boundingObject Capsule {
+        height 0.07
+        radius 0.02
+        subdivision 16
+      }
+      physics Physics {
+        density 800
+        damping Damping {
+          linear 1
+          angular 1
+        }
+      }
+    }
+  ]
+  name "bottle_trash(4)"
+  immersionProperties [
+    ImmersionProperties {
+      fluidName "swimming pool"
+    }
+  ]
+  physics Physics {
+    mass 0.01
+    damping Damping {
+      linear 1
+      angular 1
+    }
+  }
+  controller ""
+}
+DEF BOTTLE Robot {
+  translation -0.43 -1.72998 0.9175821200000001
+  rotation 0.8111369524920831 0.3811347243297367 -0.4436137579155453 8.16122314839459e-05
+  children [
+    GPS {
+    }
+    Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.541176 0.886275 0.203922
+            roughness 0.5
+            roughnessMap ImageTexture {
+              url [
+                "textures/plastic.jpg"
+              ]
+            }
+            metalness 0
+          }
+          geometry Capsule {
+            height 0.07
+            radius 0.02
+          }
+          castShadows FALSE
+        }
+      ]
+      immersionProperties [
+        ImmersionProperties {
+          fluidName "swimming pool"
+        }
+      ]
+      boundingObject Capsule {
+        height 0.07
+        radius 0.02
+        subdivision 16
+      }
+      physics Physics {
+        density 800
+        damping Damping {
+          linear 1
+          angular 1
+        }
+      }
+    }
+  ]
+  name "bottle_trash(5)"
+  immersionProperties [
+    ImmersionProperties {
+      fluidName "swimming pool"
+    }
+  ]
+  physics Physics {
+    mass 0.01
+    damping Damping {
+      linear 1
+      angular 1
+    }
+  }
+  controller ""
+}
 DEF BOX Robot {
-  translation 2 -2 0.4459926535911232
-  rotation 1 -4.6253571463347285e-09 -2.7381732854050046e-15 1.7305817733620668e-06
+  translation -1.21 5.46 0.4460084975009857
+  rotation 0.9999999999999999 -4.625419126446192e-09 -2.738045629744542e-15 1.730628559843687e-06
   children [
     GPS {
     }
@@ -727,9 +1027,289 @@ DEF BOX Robot {
   }
   controller ""
 }
+DEF BOX Robot {
+  translation -1.11 -7.93 0.52589812
+  rotation 1 -4.6253571463347285e-09 -2.738173285405005e-15 1.7305817733620668e-06
+  children [
+    GPS {
+    }
+    Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.929412 0.831373 0
+            roughness 0.5
+            roughnessMap ImageTexture {
+              url [
+                "textures/plastic.jpg"
+              ]
+            }
+            metalness 0
+          }
+          geometry Box {
+            size 0.05 0.05 0.05
+          }
+        }
+      ]
+      immersionProperties [
+        ImmersionProperties {
+          fluidName "swimming pool"
+        }
+      ]
+      boundingObject Box {
+        size 0.05 0.05 0.05
+      }
+      physics Physics {
+        density 500
+        damping Damping {
+          linear 1
+          angular 1
+        }
+      }
+    }
+  ]
+  name "box_trash(1)"
+  immersionProperties [
+    ImmersionProperties {
+      fluidName "swimming pool"
+    }
+  ]
+  physics Physics {
+    mass 0.01
+    damping Damping {
+      linear 1
+      angular 1
+    }
+  }
+  controller ""
+}
+DEF BOX Robot {
+  translation -8.86 0.49 0.6259021200000001
+  rotation 1 -4.6253571463347285e-09 -2.738173285405005e-15 1.7305817733620668e-06
+  children [
+    GPS {
+    }
+    Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.929412 0.831373 0
+            roughness 0.5
+            roughnessMap ImageTexture {
+              url [
+                "textures/plastic.jpg"
+              ]
+            }
+            metalness 0
+          }
+          geometry Box {
+            size 0.05 0.05 0.05
+          }
+        }
+      ]
+      immersionProperties [
+        ImmersionProperties {
+          fluidName "swimming pool"
+        }
+      ]
+      boundingObject Box {
+        size 0.05 0.05 0.05
+      }
+      physics Physics {
+        density 500
+        damping Damping {
+          linear 1
+          angular 1
+        }
+      }
+    }
+  ]
+  name "box_trash(2)"
+  immersionProperties [
+    ImmersionProperties {
+      fluidName "swimming pool"
+    }
+  ]
+  physics Physics {
+    mass 0.01
+    damping Damping {
+      linear 1
+      angular 1
+    }
+  }
+  controller ""
+}
+DEF BOX Robot {
+  translation -4.71 5.46 0.7259021200000001
+  rotation 1 -4.6253571463347285e-09 -2.738173285405005e-15 1.7305817733620668e-06
+  children [
+    GPS {
+    }
+    Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.929412 0.831373 0
+            roughness 0.5
+            roughnessMap ImageTexture {
+              url [
+                "textures/plastic.jpg"
+              ]
+            }
+            metalness 0
+          }
+          geometry Box {
+            size 0.05 0.05 0.05
+          }
+        }
+      ]
+      immersionProperties [
+        ImmersionProperties {
+          fluidName "swimming pool"
+        }
+      ]
+      boundingObject Box {
+        size 0.05 0.05 0.05
+      }
+      physics Physics {
+        density 500
+        damping Damping {
+          linear 1
+          angular 1
+        }
+      }
+    }
+  ]
+  name "box_trash(3)"
+  immersionProperties [
+    ImmersionProperties {
+      fluidName "swimming pool"
+    }
+  ]
+  physics Physics {
+    mass 0.01
+    damping Damping {
+      linear 1
+      angular 1
+    }
+  }
+  controller ""
+}
+DEF BOX Robot {
+  translation -0.81 8.61 0.8259021200000001
+  rotation 1 -4.6253571463347285e-09 -2.738173285405005e-15 1.7305817733620668e-06
+  children [
+    GPS {
+    }
+    Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.929412 0.831373 0
+            roughness 0.5
+            roughnessMap ImageTexture {
+              url [
+                "textures/plastic.jpg"
+              ]
+            }
+            metalness 0
+          }
+          geometry Box {
+            size 0.05 0.05 0.05
+          }
+        }
+      ]
+      immersionProperties [
+        ImmersionProperties {
+          fluidName "swimming pool"
+        }
+      ]
+      boundingObject Box {
+        size 0.05 0.05 0.05
+      }
+      physics Physics {
+        density 500
+        damping Damping {
+          linear 1
+          angular 1
+        }
+      }
+    }
+  ]
+  name "box_trash(4)"
+  immersionProperties [
+    ImmersionProperties {
+      fluidName "swimming pool"
+    }
+  ]
+  physics Physics {
+    mass 0.01
+    damping Damping {
+      linear 1
+      angular 1
+    }
+  }
+  controller ""
+}
+DEF BOX Robot {
+  translation 3.46 5.46 0.92590212
+  rotation 1 -4.6253571463347285e-09 -2.738173285405005e-15 1.7305817733620668e-06
+  children [
+    GPS {
+    }
+    Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.929412 0.831373 0
+            roughness 0.5
+            roughnessMap ImageTexture {
+              url [
+                "textures/plastic.jpg"
+              ]
+            }
+            metalness 0
+          }
+          geometry Box {
+            size 0.05 0.05 0.05
+          }
+        }
+      ]
+      immersionProperties [
+        ImmersionProperties {
+          fluidName "swimming pool"
+        }
+      ]
+      boundingObject Box {
+        size 0.05 0.05 0.05
+      }
+      physics Physics {
+        density 500
+        damping Damping {
+          linear 1
+          angular 1
+        }
+      }
+    }
+  ]
+  name "box_trash(5)"
+  immersionProperties [
+    ImmersionProperties {
+      fluidName "swimming pool"
+    }
+  ]
+  physics Physics {
+    mass 0.01
+    damping Damping {
+      linear 1
+      angular 1
+    }
+  }
+  controller ""
+}
 DEF BALL Robot {
-  translation -6 8 0.4499498077506807
-  rotation 0.9999999999999997 -2.072696477871989e-08 1.4977208687129695e-15 4.0040006478147205e-07
+  translation -5.15 -9.067225962690018e-22 0.44992228660511463
+  rotation 0.9999999999999998 -2.0726484740315192e-08 1.497590077656157e-15 4.0040933829845995e-07
   children [
     GPS {
     }
@@ -769,6 +1349,226 @@ DEF BALL Robot {
     }
   ]
   name "sphere_trash"
+  immersionProperties [
+    ImmersionProperties {
+      fluidName "swimming pool"
+    }
+  ]
+  physics Physics {
+    mass 0.0001
+    damping Damping {
+      linear 1
+      angular 1
+    }
+  }
+}
+DEF BALL Robot {
+  translation 4.43 2.8 0.5298591200000001
+  rotation 0.9999999999999998 -2.072696477871989e-08 1.4977208687129695e-15 4.004000647814721e-07
+  children [
+    GPS {
+    }
+    Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.8 0 0
+            roughness 0.5
+            roughnessMap ImageTexture {
+              url [
+                "textures/plastic.jpg"
+              ]
+            }
+            metalness 0
+          }
+          geometry Sphere {
+            radius 0.02
+          }
+        }
+      ]
+      immersionProperties [
+        ImmersionProperties {
+          fluidName "swimming pool"
+        }
+      ]
+      boundingObject Sphere {
+        radius 0.02
+      }
+      physics Physics {
+        density 500
+        damping Damping {
+          linear 1
+          angular 1
+        }
+      }
+    }
+  ]
+  name "sphere_trash(1)"
+  immersionProperties [
+    ImmersionProperties {
+      fluidName "swimming pool"
+    }
+  ]
+  physics Physics {
+    mass 0.0001
+    damping Damping {
+      linear 1
+      angular 1
+    }
+  }
+}
+DEF BALL Robot {
+  translation -8.12 -2.29 0.6298591200000001
+  rotation 0.9999999999999998 -2.072696477871989e-08 1.4977208687129695e-15 4.004000647814721e-07
+  children [
+    GPS {
+    }
+    Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.8 0 0
+            roughness 0.5
+            roughnessMap ImageTexture {
+              url [
+                "textures/plastic.jpg"
+              ]
+            }
+            metalness 0
+          }
+          geometry Sphere {
+            radius 0.02
+          }
+        }
+      ]
+      immersionProperties [
+        ImmersionProperties {
+          fluidName "swimming pool"
+        }
+      ]
+      boundingObject Sphere {
+        radius 0.02
+      }
+      physics Physics {
+        density 500
+        damping Damping {
+          linear 1
+          angular 1
+        }
+      }
+    }
+  ]
+  name "sphere_trash(2)"
+  immersionProperties [
+    ImmersionProperties {
+      fluidName "swimming pool"
+    }
+  ]
+  physics Physics {
+    mass 0.0001
+    damping Damping {
+      linear 1
+      angular 1
+    }
+  }
+}
+DEF BALL Robot {
+  translation 7.09 -2.94 0.7298591200000001
+  rotation 0.9999999999999998 -2.072696477871989e-08 1.4977208687129695e-15 4.004000647814721e-07
+  children [
+    GPS {
+    }
+    Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.8 0 0
+            roughness 0.5
+            roughnessMap ImageTexture {
+              url [
+                "textures/plastic.jpg"
+              ]
+            }
+            metalness 0
+          }
+          geometry Sphere {
+            radius 0.02
+          }
+        }
+      ]
+      immersionProperties [
+        ImmersionProperties {
+          fluidName "swimming pool"
+        }
+      ]
+      boundingObject Sphere {
+        radius 0.02
+      }
+      physics Physics {
+        density 500
+        damping Damping {
+          linear 1
+          angular 1
+        }
+      }
+    }
+  ]
+  name "sphere_trash(3)"
+  immersionProperties [
+    ImmersionProperties {
+      fluidName "swimming pool"
+    }
+  ]
+  physics Physics {
+    mass 0.0001
+    damping Damping {
+      linear 1
+      angular 1
+    }
+  }
+}
+DEF BALL Robot {
+  translation -8.3 -4.25 0.8298591200000001
+  rotation 0.9999999999999998 -2.072696477871989e-08 1.4977208687129695e-15 4.004000647814721e-07
+  children [
+    GPS {
+    }
+    Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.8 0 0
+            roughness 0.5
+            roughnessMap ImageTexture {
+              url [
+                "textures/plastic.jpg"
+              ]
+            }
+            metalness 0
+          }
+          geometry Sphere {
+            radius 0.02
+          }
+        }
+      ]
+      immersionProperties [
+        ImmersionProperties {
+          fluidName "swimming pool"
+        }
+      ]
+      boundingObject Sphere {
+        radius 0.02
+      }
+      physics Physics {
+        density 500
+        damping Damping {
+          linear 1
+          angular 1
+        }
+      }
+    }
+  ]
+  name "sphere_trash(4)"
   immersionProperties [
     ImmersionProperties {
       fluidName "swimming pool"
