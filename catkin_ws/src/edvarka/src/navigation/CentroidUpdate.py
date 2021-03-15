@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from numpy.linalg import norm
 import sys
+import os
 
 # FOR MATTHEW: Some of the below comments are subgoals I wrtie before writitng the code. 'DONE IN MAIN' means I have completed it in the 'main' function.
 # 'TODO' Means I have yet to do it and finally 'DONE' means the have completed the goal below the comment. 
@@ -84,7 +85,7 @@ class centroidUpdate:
 
     def __init__(self, lochEdge, loch, n, itteration, trashFound):
 
-        self.lochEdge = lochEdge # geojson file     
+        self.lochEdge = os.path.join('navigation', lochEdge) # geojson file     
         self.loch = loch # String - name of loch 
         self.n = n # Number of clusters
         self.itteration = itteration # Number of itterations the boat has made 
@@ -92,7 +93,11 @@ class centroidUpdate:
         #trashFound = [[-3.161460, 55.952601], [-3.160464, 55.953057], [-3.160613, 55.951984], [-3.160931, 55.952591], [-3.161129, 55.951779], [-3.162361, 55.951572]]
 
 
-        centroids = pd.read_csv(self.loch + '_centroids.csv').to_numpy()[:,1:]
+        whole_list = pd.read_csv(self.loch + '_centroids.csv').to_numpy()
+        centroids = whole_list[:,1:]
+        print("Iter: ",self.itteration)
+        print("centroids: ",centroids)
+        print("whole list:, ", whole_list)
         rand_pts = pd.read_csv(self.loch + '_rand.csv').to_numpy()[:,1:].tolist()
         init_loc = pd.read_csv(self.loch + '_startingLoc.csv').to_numpy()[:,1:]
         # trashFound = pd.read_csv() # Read trash found to numpy array of list of list...
@@ -102,7 +107,8 @@ class centroidUpdate:
 
         # Adding the trash
         for x in range(100*len(trashFound)):
-            rand_pts.append(trashFound[x % len(trashFound)])
+            trash = trashFound[x % len(trashFound)]
+            rand_pts.append([trash.longitude, trash.latitude])
         # Convert back to numpy array 
         x_updated = np.array(rand_pts)
 
@@ -182,7 +188,7 @@ class centroidUpdate:
 
         # Trash on itteration 2
         for trash in trashFound:
-            pt = geoPt((trash[0], trash[1]))
+            pt = geoPt((trash.longitude, trash.latitude))
             features.append(Feature(geometry=pt, properties={'marker-color':'#ffa500'}))
 
         feature_collection = FeatureCollection(features)
@@ -205,13 +211,14 @@ class centroidUpdate:
 
         # Task 10 - Standar file writing for saving our centroid centers, data set X and exact path taken(Not needed as path probably will change).
         random_df = pd.DataFrame(data = x_updated)
-        centroids_df = pd.DataFrame(data = centroids, columns=['lng', 'lat'])
+        centroids_df = pd.DataFrame(data = centroids)
         # Add pandas df of starting loc...
         cordStartLoc = np.array([startingLoc[0], startingLoc[1]]).reshape(1,2)
         initial_df = pd.DataFrame(data = cordStartLoc)
 
         random_df.to_csv(self.loch + '_rand.csv') # We update the centroid points with trash added for any future itterations. 
-        centroids_df.to_csv(self.loch + '_centroids.csv')
+        centroids_df.to_csv(self.loch + '_centroids.csv', header = True)
+        centroids_df.to_csv(self.loch + '_centroids_all.csv', header = True, mode='a')
 
         self.centroidList = centroidList
 

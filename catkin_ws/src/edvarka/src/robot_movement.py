@@ -16,14 +16,14 @@ class robot_movement:
         self.MAX_ROT_V = 2
         self.ARMS_OPEN = 0
         self.ARMS_CLOSED = 1.5
-        self.OBJECT_FACING_THRESHOLD = 10
-        self.APPROACH_TRASH_VELOCITY = 1.2
-        self.SMALL_OBJ_THRESH = (256*256*0.00005) # 1/1000th of the image
+        self.OBJECT_FACING_THRESHOLD = 40
+        self.APPROACH_TRASH_VELOCITY = 1.4
+        self.SMALL_OBJ_THRESH = (256*256*0.0000001) # 1/1000th of the image
         # PΙD controller for facing
-        self.INCLUDE_I_TERM_THRESHOLD_F = math.radians(10)
+        self.INCLUDE_I_TERM_THRESHOLD_F = math.radians(20)
         self.last_f_error = 0
-        self.f_Kp = 3
-        self.f_Kd = 800
+        self.f_Kp = 2.3
+        self.f_Kd = 200
         self.f_Ki = 0.2
         # PID controller for travelling
         self.INCLUDE_I_TERM_THRESHOLD_T = 0.4
@@ -32,11 +32,11 @@ class robot_movement:
         self.t_Kd = 300
         self.t_Ki = 0.1
         # PID controller for facing (using vision)
-        self.INCLUDE_I_TERM_THRESHOLD_V = 10
+        self.INCLUDE_I_TERM_THRESHOLD_V = 15
         self.last_v_error = 0
-        self.v_Kp = 0.08
-        self.v_Kd = 30
-        self.v_Ki = 0
+        self.v_Kp = 0.02
+        self.v_Kd = 10
+        self.v_Ki = 0.001
         # Timer for stable facing
         self.TIMER_DURATION = 10 # steps
         self.is_timing = False
@@ -234,12 +234,14 @@ class robot_movement:
         if not self.is_scanning:
             self.is_scanning = True
             own_yaw = self.get_own_yaw()
-            self.scan_target_list = [own_yaw + offset for offset in [math.pi/2, math.pi, 3*math.pi/2, 0]]
-            for i, targ in enumerate(self.scan_target_list):
-                if targ > math.pi:
-                    self.scan_target_list[i] = targ-2*math.pi
-                if targ < -math.pi:
-                    self.scan_target_list[i] = targ+2*math.pi
+            divisions = 32
+            offsets = [i*2*math.pi/divisions for i in range(1,divisions+1)]
+            self.scan_target_list = [own_yaw + offset for offset in offsets]
+            for i in range(divisions):
+                while self.scan_target_list[i] > math.pi:
+                    self.scan_target_list[i] -= 2*math.pi
+                while self.scan_target_list[i] < -math.pi:
+                    self.scan_target_list[i] += 2*math.pi
             self.scan_target = 0
         target_yaw = self.scan_target_list[self.scan_target]
         if self.is_facing_yaw(target_yaw):

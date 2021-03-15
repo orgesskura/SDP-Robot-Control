@@ -118,7 +118,7 @@ class main_controller:
         # ensure trash collection (etc)
         self.is_etc = False
         self.etc_timer = 0
-        self.ETC_TIMER_INIT = 30
+        self.ETC_TIMER_INIT = 35
 
     
     def communicate_with_server(self):
@@ -360,7 +360,7 @@ class main_controller:
 
 
 if __name__ == "__main__":
-    mc = main_controller("StMargaretsEdge.geojson", 10, "StMargarets")
+    mc = main_controller("StMargaretsEdge.geojson", 5, "StMargarets")
     while not rospy.is_shutdown():
         mc.main_loop()
 
