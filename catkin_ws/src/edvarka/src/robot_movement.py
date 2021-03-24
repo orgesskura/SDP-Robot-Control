@@ -9,22 +9,22 @@ class robot_movement:
         self.hi = hardware_interface
         # constants
         self.MAX_FACING_THRESHOLD = math.radians(15)
-        self.MIN_FACING_THRESHOLD = math.radians(5)
-        self.FACING_THRESHOLD = math.radians(5)
-        self.DISTANCE_THRESHOLD = 0.1 # meter(s)
+        self.MIN_FACING_THRESHOLD = math.radians(10)
+        self.FACING_THRESHOLD = math.radians(10)
+        self.DISTANCE_THRESHOLD = 1 # meter(s)
         self.ARMS_OPEN_DISTANCE = 1
         self.MAX_ROT_V = 2
         self.ARMS_OPEN = 0
         self.ARMS_CLOSED = 1.5
         self.OBJECT_FACING_THRESHOLD = 40
-        self.APPROACH_TRASH_VELOCITY = 1.4
+        self.APPROACH_TRASH_VELOCITY = 0.9
         self.SMALL_OBJ_THRESH = (256*256*0.0000001) # 1/1000th of the image
         # PΙD controller for facing
-        self.INCLUDE_I_TERM_THRESHOLD_F = math.radians(20)
+        self.INCLUDE_I_TERM_THRESHOLD_F = math.radians(30)
         self.last_f_error = 0
-        self.f_Kp = 2.3
-        self.f_Kd = 100
-        self.f_Ki = 0.2
+        self.f_Kp = 1
+        self.f_Kd = 10
+        self.f_Ki = 0.5
         # PID controller for travelling
         self.INCLUDE_I_TERM_THRESHOLD_T = 0.4
         self.last_t_error = 0
@@ -32,13 +32,13 @@ class robot_movement:
         self.t_Kd = 300
         self.t_Ki = 0.1
         # PID controller for facing (using vision)
-        self.INCLUDE_I_TERM_THRESHOLD_V = 15
+        self.INCLUDE_I_TERM_THRESHOLD_V = 60
         self.last_v_error = 0
-        self.v_Kp = 0.02
-        self.v_Kd = 10
-        self.v_Ki = 0.001
+        self.v_Kp = 0.01
+        self.v_Kd = 12
+        self.v_Ki = 0.0001
         # Timer for stable facing
-        self.TIMER_DURATION = 10 # steps
+        self.TIMER_DURATION = 5 # steps
         self.is_timing = False
         self.timer = self.TIMER_DURATION
         # Estimated robot state, gets updated by the main controller through the EKF node
@@ -234,7 +234,7 @@ class robot_movement:
         if not self.is_scanning:
             self.is_scanning = True
             own_yaw = self.get_own_yaw()
-            divisions = 32
+            divisions = 4
             offsets = [i*2*math.pi/divisions for i in range(1,divisions+1)]
             self.scan_target_list = [own_yaw + offset for offset in offsets]
             for i in range(divisions):

@@ -34,7 +34,8 @@ class main_controller:
         self.msg_seq = 0
         self.imu0_pub = rospy.Publisher("/imu0_topic", Imu, queue_size=5)
         self.compass_pub = rospy.Publisher("/compass_topic", PoseWithCovarianceStamped, queue_size=5)
-        self.gps_odom_pub = rospy.Publisher("/odom_gps", Odometry, queue_size=5)
+        self.gps1_odom_pub = rospy.Publisher("/odom_gps1", Odometry, queue_size=5)
+        self.gps2_odom_pub = rospy.Publisher("/odom_gps2", Odometry, queue_size=5)
         self.front_image_pub = rospy.Publisher("/front_camera_view", Image, queue_size=1)
         self.water_image_pub = rospy.Publisher("/water_camera_view", Image, queue_size=1)
         # subscribers
@@ -58,7 +59,7 @@ class main_controller:
         # initialize robot movement object
         self.rm = robot_movement(self.hi)
         # initialize navsat transform
-        self.my_navsat_transform = my_navsat_transform()
+        self.my_navsat_transform = my_navsat_transform(self.hi)
 
         # setup object detection variables
         self.is_object_detected = False
@@ -202,7 +203,7 @@ class main_controller:
         imu_msg.orientation.z = quat[2]
         imu_msg.orientation.w = quat[3]
         imu_msg.orientation_covariance = [0 for i in range(9)]
-        imu_msg.orientation_covariance[8] = math.radians(1)**2
+        imu_msg.orientation_covariance[8] = self.hi.IMU_NOISE**2
         # angular velocity
         av = Vector3()
         av.x = 0
@@ -210,7 +211,7 @@ class main_controller:
         av.z = z_axis_angular_vel
         imu_msg.angular_velocity = av
         avc = [0 for i in range(9)]
-        avc[8] = 0.02**2
+        avc[8] = self.hi.GYROSCOPE_NOISE**2
         imu_msg.angular_velocity_covariance = avc # TODO: FIX THIS
         # linear acceleration
         la = Vector3()
@@ -219,17 +220,11 @@ class main_controller:
         la.z = 0
         imu_msg.linear_acceleration = la
         lac = [0 for i in range(9)]
-        lac[4] = 0.1**2
+        lac[4] = self.hi.ACCELEROMETER_NOISE**2
         imu_msg.linear_acceleration_covariance = lac # TODO: AND THIS
         self.imu0_pub.publish(imu_msg)
 
         compass_reading = self.hi.get_compass_reading()
-        # compass_reading is the counter-clockwise angle from east
-        # if compass_reading > math.pi:
-        #     compass_reading -= 2*math.pi
-        # if compass_reading < -math.pi:
-        #     compass_reading += 2*math.pi
-        # print("Compass: {}".format(compass_reading))
         comp_msg = PoseWithCovarianceStamped()
         comp_msg.header.stamp = rospy.Time.now()
         comp_msg.header.seq = self.msg_seq
@@ -241,10 +236,11 @@ class main_controller:
         comp_msg.pose.pose.orientation.w = quat[3]
         comp_cov = [0 for i in range(36)] # TODO: and this...
         for i in [0,7,14,21,28,35]:
-            comp_cov[i] = math.radians(1)**2
+            comp_cov[i] = self.hi.COMPASS_NOISE**2
         comp_msg.pose.covariance = comp_cov
         self.compass_pub.publish(comp_msg)
 
+        # "gps1" reading
         gps_reading = self.hi.get_gps_values()
         gps_msg = NavSatFix()
         gps_msg.header.stamp = rospy.Time.now()
@@ -254,8 +250,8 @@ class main_controller:
         gps_msg.longitude = gps_reading[1]
         gps_msg.altitude = 0
         pos_cov = [0 for i in range(9)] # TODO: change!
-        pos_cov[0] = 0.00001
-        pos_cov[4] = 0.00001
+        pos_cov[0] = self.hi.GPS_NOISE**2
+        pos_cov[4] = self.hi.GPS_NOISE**2
         gps_msg.position_covariance = pos_cov
         gps_msg.position_covariance_type = NavSatFix.COVARIANCE_TYPE_DIAGONAL_KNOWN # TODO: change?
         if self.my_navsat_transform.origin is None:
@@ -265,7 +261,24 @@ class main_controller:
                 return
             self.my_navsat_transform.set_origin(utils.longlat_position(gps_msg.longitude, gps_msg.latitude))
         odom_gps_msg = self.my_navsat_transform.transform_to_odometry(gps_msg)
-        self.gps_odom_pub.publish(odom_gps_msg)
+        self.gps1_odom_pub.publish(odom_gps_msg)
+
+        # "gps2" reading
+        gps_reading = self.hi.get_gps_values()
+        gps_msg = NavSatFix()
+        gps_msg.header.stamp = rospy.Time.now()
+        gps_msg.header.seq = self.msg_seq
+        gps_msg.header.frame_id = "base_link"
+        gps_msg.latitude = gps_reading[0]
+        gps_msg.longitude = gps_reading[1]
+        gps_msg.altitude = 0
+        pos_cov = [0 for i in range(9)] # TODO: change!
+        pos_cov[0] = self.hi.GPS_NOISE**2
+        pos_cov[4] = self.hi.GPS_NOISE**2
+        gps_msg.position_covariance = pos_cov
+        gps_msg.position_covariance_type = NavSatFix.COVARIANCE_TYPE_DIAGONAL_KNOWN # TODO: change?
+        odom_gps_msg = self.my_navsat_transform.transform_to_odometry(gps_msg)
+        self.gps2_odom_pub.publish(odom_gps_msg)
     
     def publish_camera_images(self):
         while True:

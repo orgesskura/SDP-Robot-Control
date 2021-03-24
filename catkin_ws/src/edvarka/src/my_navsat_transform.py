@@ -8,9 +8,10 @@ import numpy
 import utils
 
 class my_navsat_transform:
-    def __init__(self):
+    def __init__(self, hi=None):
         self.origin = None
         self.seq = 0
+        self.hi = hi
 
     def set_origin(self, origin):
         self.origin = origin
@@ -22,7 +23,10 @@ class my_navsat_transform:
         # add gaussian noise
         x_coordinate = xy_position.x
         y_coordinate = xy_position.y
-        noise = numpy.random.normal(loc=0, scale=0.1, size=2)
+        if self.hi is not None:
+            noise = numpy.random.normal(loc=0, scale=self.hi.GPS_NOISE, size=2)
+        else:
+            noise = [0,0]
         x_coordinate += noise[0]
         y_coordinate += noise[1]
         self.seq += 1
@@ -45,8 +49,8 @@ class my_navsat_transform:
         odom_msg.twist.twist.angular.y = 0
         odom_msg.twist.twist.angular.z = 0
         cov = [0 for i in range(36)]
-        cov[0] = 0.1**2#(navsatfix_msg.position_covariance[0] * 100000)**2
-        cov[7] = 0.1**2#(navsatfix_msg.position_covariance[4] * 100000)**2
+        cov[0] = navsatfix_msg.position_covariance[0]
+        cov[7] = navsatfix_msg.position_covariance[4]
         cov[14] = navsatfix_msg.position_covariance[8]
         odom_msg.pose.covariance = cov
         return odom_msg

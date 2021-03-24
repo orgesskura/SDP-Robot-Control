@@ -27,6 +27,12 @@ class hardware_interface:
         self.set_right_propeller_velocity(0)
         self.left_arm = self.robot.getDevice("left_arm_motor")
         self.right_arm = self.robot.getDevice("right_arm_motor")
+        # noises
+        self.COMPASS_NOISE = math.radians(5)
+        self.GPS_NOISE = 0.0000001 # meters
+        self.ACCELEROMETER_NOISE = 0.5 # m/s^2
+        self.GYROSCOPE_NOISE = math.radians(5) # rad/s
+        self.IMU_NOISE = math.radians(5)
 
 
     def enable_devices(self):
@@ -67,13 +73,13 @@ class hardware_interface:
         angle = utils.angle_between_xy_vectors(pos1, pos2)
         if reading[0] < 0:
             angle *= -1
-        noise = numpy.random.normal(loc=0, scale=math.radians(1), size=1)[0]
+        noise = numpy.random.normal(loc=0, scale=self.COMPASS_NOISE, size=1)[0]
         angle += noise
         return angle
     
     def get_accelerometer_reading(self):
         reading = self.accelerometer.getValues()
-        noise = numpy.random.normal(loc=0, scale=0.1, size=3)
+        noise = numpy.random.normal(loc=0, scale=self.ACCELEROMETER_NOISE, size=3)
         reading[0] += noise[0]
         reading[1] += noise[1]
         reading[2] += noise[2]
@@ -81,7 +87,7 @@ class hardware_interface:
     
     def get_gyro_reading(self):
         reading = self.gyro.getValues()
-        noise = numpy.random.normal(loc=0, scale=0.02, size=3)
+        noise = numpy.random.normal(loc=0, scale=self.GYROSCOPE_NOISE, size=3)
         reading[0] += noise[0]
         reading[1] += noise[1]
         reading[2] += noise[2]
@@ -89,7 +95,7 @@ class hardware_interface:
     
     def get_imu_reading(self):
         reading = self.imu.getRollPitchYaw()
-        noise = numpy.random.normal(loc=0, scale=math.radians(1), size=3)
+        noise = numpy.random.normal(loc=0, scale=self.IMU_NOISE, size=3)
         reading[0] += noise[0]
         reading[1] += noise[1]
         reading[2] += noise[2]

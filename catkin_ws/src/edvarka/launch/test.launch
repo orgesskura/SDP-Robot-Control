@@ -12,12 +12,12 @@
   <node name="main_controller" pkg="edvarka" type="main_controller.py" required="$(arg auto_close)" output="screen" cwd="node"/>
   
   <node pkg="robot_localization" type="ekf_localization_node" name="ekf_node_map" clear_params="true">
-    <rosparam command="load" file="$(find robot_localization)/params/map_frame_node_params.yaml" />
+    <rosparam command="load" file="$(find edvarka)/params/map_frame_node_params.yaml" />
     <remap from="odometry/filtered" to="/map_prediction"/>
   </node>
 
   <node pkg="robot_localization" type="ekf_localization_node" name="ekf_node_odom" clear_params="true">
-    <rosparam command="load" file="$(find robot_localization)/params/odom_frame_node_params.yaml" />
+    <rosparam command="load" file="$(find edvarka)/params/odom_frame_node_params.yaml" />
     <remap from="odometry/filtered" to="/odom_prediction"/>
   </node>
 
