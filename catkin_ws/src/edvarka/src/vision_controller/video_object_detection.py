@@ -38,12 +38,14 @@ def image_object_detect(img_base,img_obj):
 def update_front_image(img):
     global bridge, front_image
     front_image = bridge.imgmsg_to_cv2(img)
+    cv2.imwrite('../../images/front.png', front_image)
     # cv2.imshow("cv2_front", front_image)
     # cv2.waitKey(1)
 
 def update_water_image(img):
     global bridge, water_image
     water_image = bridge.imgmsg_to_cv2(img)
+    cv2.imwrite('../../images/water.png', water_image)
     # cv2.imshow("cv2_back", water_image)
     # cv2.waitKey(1)
 
