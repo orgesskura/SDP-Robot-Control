@@ -240,6 +240,8 @@ class main_controller:
         comp_msg.pose.covariance = comp_cov
         self.compass_pub.publish(comp_msg)
 
+        p = 2
+
         # "gps1" reading
         gps_reading = self.hi.get_gps_values()
         gps_msg = NavSatFix()
@@ -250,8 +252,8 @@ class main_controller:
         gps_msg.longitude = gps_reading[1]
         gps_msg.altitude = 0
         pos_cov = [0 for i in range(9)] # TODO: change!
-        pos_cov[0] = self.hi.GPS_NOISE**2
-        pos_cov[4] = self.hi.GPS_NOISE**2
+        pos_cov[0] = self.hi.GPS_NOISE**p
+        pos_cov[4] = self.hi.GPS_NOISE**p
         gps_msg.position_covariance = pos_cov
         gps_msg.position_covariance_type = NavSatFix.COVARIANCE_TYPE_DIAGONAL_KNOWN # TODO: change?
         if self.my_navsat_transform.origin is None:
@@ -273,8 +275,8 @@ class main_controller:
         gps_msg.longitude = gps_reading[1]
         gps_msg.altitude = 0
         pos_cov = [0 for i in range(9)] # TODO: change!
-        pos_cov[0] = self.hi.GPS_NOISE**2
-        pos_cov[4] = self.hi.GPS_NOISE**2
+        pos_cov[0] = self.hi.GPS_NOISE**p
+        pos_cov[4] = self.hi.GPS_NOISE**p
         gps_msg.position_covariance = pos_cov
         gps_msg.position_covariance_type = NavSatFix.COVARIANCE_TYPE_DIAGONAL_KNOWN # TODO: change?
         odom_gps_msg = self.my_navsat_transform.transform_to_odometry(gps_msg)
@@ -341,7 +343,6 @@ class main_controller:
                 if self.rm.is_at(next_position) or self.rm.is_scanning:
                     if self.rm.scan():
                         print("Scanning...")
-                        pass
                     else:
                         print("Next step in the path...")
                         self.path_pos += 1

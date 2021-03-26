@@ -3,11 +3,11 @@ WorldInfo {
   gpsCoordinateSystem "WGS84"
 }
 Viewpoint {
-  orientation 0.803241880543648 -0.16093363719117176 0.5735005194078938 0.10331325616838448
-  position -0.6210973261220385 -3.5118091900616832 48.366638132109976
+  orientation -0.927858078244724 -0.3709817394946305 -0.03810427269409488 0.05125637035477673
+  position 0.20735220656857373 3.5489198018022665 61.89571849232163
 }
 DEF NORTH_POINTER Solid {
-  translation 0 12.23 0
+  translation 0 13.27 0
   children [
     Shape {
       appearance PBRAppearance {
@@ -16,7 +16,7 @@ DEF NORTH_POINTER Solid {
         metalness 0
       }
       geometry Box {
-        size 0.3 1 0.1
+        size 0.3 3 0.1
       }
     }
   ]
@@ -79,8 +79,8 @@ DEF EdVarka Robot {
   rotation 0.002505241418301667 -0.024602374756258902 -0.9996941766969479 3.076851121863551
   children [
     Camera {
-      translation 0.16 0 0.089297
-      rotation 0 1 0 -0.523595307179586
+      translation -5.19617e-08 0.29 0.059297
+      rotation 0.25056406820530264 -0.250561068204486 0.9351132545444084 1.63783
       children [
         Transform {
           rotation 1 0 0 1.5708
@@ -602,9 +602,9 @@ DEF EdVarka Robot {
 SolidPipe {
   translation 0 0 0.25
   rotation 1 0 0 1.5708
-  height 0.5
+  height 5
   radius 12
-  thickness 1
+  thickness 0.5
   appearance PBRAppearance {
     baseColor 0.321569 0.364706 0.552941
     roughness 0.5

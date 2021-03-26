@@ -28,12 +28,11 @@ class hardware_interface:
         self.left_arm = self.robot.getDevice("left_arm_motor")
         self.right_arm = self.robot.getDevice("right_arm_motor")
         # noises
-        self.COMPASS_NOISE = math.radians(5)
-        self.GPS_NOISE = 0.0000001 # meters
-        self.ACCELEROMETER_NOISE = 0.5 # m/s^2
-        self.GYROSCOPE_NOISE = math.radians(5) # rad/s
-        self.IMU_NOISE = math.radians(5)
-
+        self.COMPASS_NOISE = math.radians(0.5)
+        self.GPS_NOISE = 1 # meters
+        self.ACCELEROMETER_NOISE = 0.1 # m/s^2
+        self.GYROSCOPE_NOISE = math.radians(0.5) # rad/s
+        self.IMU_NOISE = math.radians(0.5)
 
     def enable_devices(self):
         self.gps.enable(self.timestep)
@@ -108,6 +107,7 @@ class hardware_interface:
         self.set_propeller_position(self.left_propeller, p)
 
     def set_left_propeller_velocity(self, v):
+        print("Left v: {}".format(v))
         self.set_propeller_velocity(self.left_propeller, v)
 
     def set_left_propeller_acceleration(self, a):
@@ -117,6 +117,7 @@ class hardware_interface:
         self.set_propeller_position(self.right_propeller, p)
 
     def set_right_propeller_velocity(self, v):
+        print("Right v: {}".format(v))
         self.set_propeller_velocity(self.right_propeller, v)
 
     def set_right_propeller_acceleration(self, a):
@@ -135,3 +136,5 @@ class hardware_interface:
         self.left_arm.setPosition(p)
         self.right_arm.setPosition(p)
 
+
+# %%

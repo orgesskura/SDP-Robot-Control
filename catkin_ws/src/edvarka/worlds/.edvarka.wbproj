@@ -4,9 +4,9 @@ simulationViewPerspectives: 000000ff0000000100000002000001000000067e010000000201
 sceneTreePerspectives: 000000ff000000010000000200000196000000fb0100000002010000000201
 maximizedDockId: -1
 centralWidgetVisible: 1
-renderingMode: WIREFRAME
+renderingMode: PLAIN
 orthographicViewHeight: 1
 textFiles: -1
 consoles: Console:All:All
-renderingDevicePerspectives: edvarka:front_camera;1;1.10938;0.00180505;0.158672
+renderingDevicePerspectives: edvarka:front_camera;1;1.10938;0;0.185751
 renderingDevicePerspectives: edvarka:water_camera;1;0.492188;0;0

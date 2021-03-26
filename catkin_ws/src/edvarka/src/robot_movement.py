@@ -14,17 +14,18 @@ class robot_movement:
         self.DISTANCE_THRESHOLD = 1 # meter(s)
         self.ARMS_OPEN_DISTANCE = 1
         self.MAX_ROT_V = 2
+        self.MAX_ROT_V_FACING = 5
         self.ARMS_OPEN = 0
         self.ARMS_CLOSED = 1.5
         self.OBJECT_FACING_THRESHOLD = 40
-        self.APPROACH_TRASH_VELOCITY = 0.9
+        self.APPROACH_TRASH_VELOCITY = 1.1
         self.SMALL_OBJ_THRESH = (256*256*0.0000001) # 1/1000th of the image
         # PΙD controller for facing
-        self.INCLUDE_I_TERM_THRESHOLD_F = math.radians(30)
+        self.INCLUDE_I_TERM_THRESHOLD_F = math.radians(40)
         self.last_f_error = 0
         self.f_Kp = 1
-        self.f_Kd = 10
-        self.f_Ki = 0.5
+        self.f_Kd = 200
+        self.f_Ki = 0.1
         # PID controller for travelling
         self.INCLUDE_I_TERM_THRESHOLD_T = 0.4
         self.last_t_error = 0
@@ -35,8 +36,8 @@ class robot_movement:
         self.INCLUDE_I_TERM_THRESHOLD_V = 60
         self.last_v_error = 0
         self.v_Kp = 0.01
-        self.v_Kd = 12
-        self.v_Ki = 0.0001
+        self.v_Kd = 20
+        self.v_Ki = 0.001
         # Timer for stable facing
         self.TIMER_DURATION = 5 # steps
         self.is_timing = False
@@ -132,7 +133,11 @@ class robot_movement:
         if abs(error) < self.INCLUDE_I_TERM_THRESHOLD_F:
             include_i_term = 1
         rotation_velocity = (self.f_Kp*error + self.f_Kd*error_derivative + include_i_term*self.f_Ki*error_integral)
-        rotation_velocity = self.cap_propeller_velocity(rotation_velocity)
+        print("error:", error)
+        print("error_d:", error_derivative)
+        print("error_i:", error_integral)
+        print("rot_v:", rotation_velocity)
+        rotation_velocity = self.cap_propeller_facing_velocity(rotation_velocity)
         self.hi.set_left_propeller_velocity(-rotation_velocity)
         self.hi.set_right_propeller_velocity(rotation_velocity)
     
@@ -153,7 +158,7 @@ class robot_movement:
         if abs(error) < self.INCLUDE_I_TERM_THRESHOLD_V:
             include_i_term = 1
         rotation_velocity = (self.v_Kp*error + self.v_Kd*error_derivative + include_i_term*self.v_Ki*error_integral)
-        rotation_velocity = self.cap_propeller_velocity(rotation_velocity)
+        rotation_velocity = self.cap_propeller_facing_velocity(rotation_velocity)
         self.hi.set_left_propeller_velocity(rotation_velocity)
         self.hi.set_right_propeller_velocity(-rotation_velocity)
     
@@ -175,6 +180,11 @@ class robot_movement:
     def cap_propeller_velocity(self, v):
         if abs(v) > self.MAX_ROT_V:
             v = v/abs(v) * self.MAX_ROT_V
+        return v
+
+    def cap_propeller_facing_velocity(self, v):
+        if abs(v) > self.MAX_ROT_V_FACING:
+            v = v/abs(v) * self.MAX_ROT_V_FACING
         return v
     
     # Adjusts the speed of the propellers using a PID controller in order to move the robot towards
