@@ -50,5 +50,6 @@ def getHorizon(img):
 
 def removeBackground(img,h):
     img_copy = img.copy()
-    img_copy[:h] = 0
+    # remove 5 more pixel from horizon for robustness 
+    img_copy[:h+5] = 0
     return img_copy
