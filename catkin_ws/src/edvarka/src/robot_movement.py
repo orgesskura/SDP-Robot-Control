@@ -18,7 +18,7 @@ class robot_movement:
         self.ARMS_OPEN = 0
         self.ARMS_CLOSED = 1.5
         self.OBJECT_FACING_THRESHOLD = 40
-        self.APPROACH_TRASH_VELOCITY = 1.1
+        self.APPROACH_TRASH_VELOCITY = 0.9
         self.SMALL_OBJ_THRESH = (256*256*0.0000001) # 1/1000th of the image
         # PΙD controller for facing
         self.INCLUDE_I_TERM_THRESHOLD_F = math.radians(40)

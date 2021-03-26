@@ -19,7 +19,9 @@ def convertUnit8(img):
 
 # method to sbtract base image from object image
 def image_subtraction(img1,img2):
-    sub =  cv2.subtract(img1,img2)
+    img1 = np.array(img1, dtype=int)
+    img2 = np.array(img2, dtype=int)
+    sub = np.uint8(np.abs(img1-img2))
     sub -= np.min(sub)
     # cv2.imshow("sub", sub)
     # cv2.waitKey(1)
@@ -27,7 +29,6 @@ def image_subtraction(img1,img2):
 
 # method to segment image using threshold
 def binarization(img):
-    cv2.imshow("view", img)
     cv2.waitKey(1)
     t = 50
     red = img[:,:,2] < t

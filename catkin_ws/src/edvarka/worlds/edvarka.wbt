@@ -3,8 +3,8 @@ WorldInfo {
   gpsCoordinateSystem "WGS84"
 }
 Viewpoint {
-  orientation -0.927858078244724 -0.3709817394946305 -0.03810427269409488 0.05125637035477673
-  position 0.20735220656857373 3.5489198018022665 61.89571849232163
+  orientation -0.21330178488474144 0.5833349412350886 0.7837236087417802 3.73260742804789
+  position -1.3161258160182983 1.8638709727912537 1.1940637468690207
 }
 DEF NORTH_POINTER Solid {
   translation 0 13.27 0
@@ -75,8 +75,8 @@ DEF SWIMMING_POOL_BOTTOM Transform {
   ]
 }
 DEF EdVarka Robot {
-  translation -0.000168756 -0.000697801 0.487
-  rotation 0.002505241418301667 -0.024602374756258902 -0.9996941766969479 3.076851121863551
+  translation 2.846037651921783e-05 0.00010184056665887842 0.47973558603648514
+  rotation -0.0004719746819796431 -0.002733166543694359 -0.9999961535128742 -3.0481973096771795
   children [
     Camera {
       translation -5.19617e-08 0.29 0.059297
@@ -102,7 +102,7 @@ DEF EdVarka Robot {
     }
     Camera {
       translation -0.00999973 -0.238492 0.132954
-      rotation -2.5062292787148364e-09 0.5226868495723145 0.8525247546459686 3.14159
+      rotation -2.7073998631950887e-09 0.5646419714686419 0.8253359582957751 3.14159
       children [
         Transform {
           rotation 1 0 0 1.5708
@@ -219,7 +219,7 @@ DEF EdVarka Robot {
     }
     DEF RIGHT_ARM HingeJoint {
       jointParameters HingeJointParameters {
-        position 1.4129849557224434
+        position 1.3831610109554608
         axis 0 0 1
         anchor -0.16 -0.22 0.08
       }
@@ -231,8 +231,8 @@ DEF EdVarka Robot {
         }
       ]
       endPoint Solid {
-        translation -0.09715613360758439 -0.2705039449632622 0.030000000000000124
-        rotation 0 0 0.9999999999999999 1.4129849557224436
+        translation -0.09869008391509362 -0.27235545997946864 0.030000000000000138
+        rotation 0 0 0.9999999999999999 1.3831610109554608
         children [
           Solid {
             rotation 1 0 0 0.261799
@@ -282,7 +282,7 @@ DEF EdVarka Robot {
     }
     DEF LEFT_ARM HingeJoint {
       jointParameters HingeJointParameters {
-        position 1.4125889860988323
+        position 1.4125889842712318
         axis 0 0 -1
         anchor 0.14 -0.22 0.08
       }
@@ -294,8 +294,8 @@ DEF EdVarka Robot {
         }
       ]
       endPoint Solid {
-        translation 0.07402517277398758 -0.25077859926146506 0.02999999999999988
-        rotation 0 0 -1 1.4125889860988323
+        translation 0.07402517283023856 -0.25077859938204067 0.029999999999999923
+        rotation 0 0 -1 1.4125889842712318
         children [
           Solid {
             rotation 1 0 0 0.261799
@@ -598,6 +598,8 @@ DEF EdVarka Robot {
     }
   }
   controller "<extern>"
+  linearVelocity -0.00011203630184942429 1.2897909853275472e-05 6.775762621892599e-08
+  angularVelocity -1.3910752031304258e-06 -1.3198175465595005e-05 9.145161968529943e-05
 }
 SolidPipe {
   translation 0 0 0.25
@@ -612,8 +614,8 @@ SolidPipe {
   }
 }
 DEF BOTTLE Robot {
-  translation 6 -1.73 0.4374354862956118
-  rotation 0.8111370212951763 0.3811346621488364 -0.4436136855340253 8.161224479950007e-05
+  translation 6 -1.73 0.43742055954613396
+  rotation 0.8117502632293 0.38057983048694005 -0.4429678349199795 8.173123095087963e-05
   children [
     GPS {
     }
@@ -672,8 +674,8 @@ DEF BOTTLE Robot {
   controller ""
 }
 DEF BOTTLE Robot {
-  translation -6.43993 5.10033 0.5182131200000001
-  rotation 0.8111369524920831 0.3811347243297367 -0.4436137579155453 8.16122314839459e-05
+  translation -6.43993 5.10033 0.43744564874914726
+  rotation 0.811750202470972 0.38057988527742187 -0.44296789918746987 8.173121909350981e-05
   children [
     GPS {
     }
@@ -732,8 +734,8 @@ DEF BOTTLE Robot {
   controller ""
 }
 DEF BOTTLE Robot {
-  translation -5.27 -7.07983 0.61734712
-  rotation 0.8111369524920831 0.3811347243297367 -0.4436137579155453 8.16122314839459e-05
+  translation -5.27 -7.07983 0.43740090852327607
+  rotation 0.8117498668217321 0.38058018929275117 -0.44296825307553783 8.173115380112869e-05
   children [
     GPS {
     }
@@ -792,8 +794,8 @@ DEF BOTTLE Robot {
   controller ""
 }
 DEF BOTTLE Robot {
-  translation 6.29999 -7.33 0.71698512
-  rotation 0.8111369524920831 0.3811347243297367 -0.4436137579155453 8.16122314839459e-05
+  translation 6.29999 -7.33 0.4373999895975554
+  rotation 0.8117495289703007 0.38058049566392743 -0.4429686089743768 8.173108813786561e-05
   children [
     GPS {
     }
@@ -852,8 +854,8 @@ DEF BOTTLE Robot {
   controller ""
 }
 DEF BOTTLE Robot {
-  translation 7.27 2.67 0.8176261200000001
-  rotation 0.8111369524920831 0.3811347243297367 -0.4436137579155453 8.16122314839459e-05
+  translation 7.27 2.67 0.43743672164858854
+  rotation 0.8117491872373903 0.38058080494843954 -0.4429689694823264 8.17310216243278e-05
   children [
     GPS {
     }
@@ -912,8 +914,8 @@ DEF BOTTLE Robot {
   controller ""
 }
 DEF BOTTLE Robot {
-  translation -0.43 -1.72998 0.9175821200000001
-  rotation 0.8111369524920831 0.3811347243297367 -0.4436137579155453 8.16122314839459e-05
+  translation -0.43 -1.72998 0.437420559619598
+  rotation 0.8117488482038837 0.38058111202782763 -0.44296932693735164 8.173095567416195e-05
   children [
     GPS {
     }
@@ -972,8 +974,8 @@ DEF BOTTLE Robot {
   controller ""
 }
 DEF BOX Robot {
-  translation -1.21 5.46 0.4460084975009857
-  rotation 0.9999999999999999 -4.625419126446192e-09 -2.738045629744542e-15 1.730628559843687e-06
+  translation -1.21 5.46 0.446020055701191
+  rotation 1 -5.049952465045765e-09 -1.8289496814534623e-15 2.159551018785721e-06
   children [
     GPS {
     }
@@ -1028,8 +1030,64 @@ DEF BOX Robot {
   controller ""
 }
 DEF BOX Robot {
-  translation -1.11 -7.93 0.52589812
-  rotation 1 -4.6253571463347285e-09 -2.738173285405005e-15 1.7305817733620668e-06
+  translation 0.221705 1.08765 0.447347
+  rotation 0.012347866326748646 0.003283308244637228 -0.9999183717104849 0.23885533269699671
+  children [
+    GPS {
+    }
+    Solid {
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.929412 0.831373 0
+            roughness 0.5
+            roughnessMap ImageTexture {
+              url [
+                "textures/plastic.jpg"
+              ]
+            }
+            metalness 0
+          }
+          geometry Box {
+            size 0.05 0.05 0.05
+          }
+        }
+      ]
+      immersionProperties [
+        ImmersionProperties {
+          fluidName "swimming pool"
+        }
+      ]
+      boundingObject Box {
+        size 0.05 0.05 0.05
+      }
+      physics Physics {
+        density 500
+        damping Damping {
+          linear 1
+          angular 1
+        }
+      }
+    }
+  ]
+  name "box_trash(6)"
+  immersionProperties [
+    ImmersionProperties {
+      fluidName "swimming pool"
+    }
+  ]
+  physics Physics {
+    mass 0.01
+    damping Damping {
+      linear 1
+      angular 1
+    }
+  }
+  controller ""
+}
+DEF BOX Robot {
+  translation -1.11 -7.93 0.44597087148485764
+  rotation 1 -3.7069287434137933e-09 -2.9891789722525887e-15 2.1593505909596643e-06
   children [
     GPS {
     }
@@ -1084,8 +1142,8 @@ DEF BOX Robot {
   controller ""
 }
 DEF BOX Robot {
-  translation -8.86 0.49 0.6259021200000001
-  rotation 1 -4.6253571463347285e-09 -2.738173285405005e-15 1.7305817733620668e-06
+  translation -8.86 0.49 0.44600179987182753
+  rotation 1 -1.444457062403469e-08 6.28538149793521e-15 2.159106731097841e-06
   children [
     GPS {
     }
@@ -1140,8 +1198,8 @@ DEF BOX Robot {
   controller ""
 }
 DEF BOX Robot {
-  translation -4.71 5.46 0.7259021200000001
-  rotation 1 -4.6253571463347285e-09 -2.738173285405005e-15 1.7305817733620668e-06
+  translation -4.71 5.46 0.446020055701191
+  rotation 1 -9.07393827207762e-09 1.646215947609866e-15 2.158873692092387e-06
   children [
     GPS {
     }
@@ -1196,8 +1254,8 @@ DEF BOX Robot {
   controller ""
 }
 DEF BOX Robot {
-  translation -0.81 8.61 0.8259021200000001
-  rotation 1 -4.6253571463347285e-09 -2.738173285405005e-15 1.7305817733620668e-06
+  translation -0.81 8.61 0.4460316262972664
+  rotation 1 -5.049106127272438e-09 -1.830567847846675e-15 2.158630189220554e-06
   children [
     GPS {
     }
@@ -1252,8 +1310,8 @@ DEF BOX Robot {
   controller ""
 }
 DEF BOX Robot {
-  translation 3.46 5.46 0.92590212
-  rotation 1 -4.6253571463347285e-09 -2.738173285405005e-15 1.7305817733620668e-06
+  translation 3.46 5.46 0.446020055701191
+  rotation 0.9999999999999999 1.6528870740741595e-09 -7.619830426944786e-15 2.15838663616256e-06
   children [
     GPS {
     }
@@ -1308,8 +1366,8 @@ DEF BOX Robot {
   controller ""
 }
 DEF BALL Robot {
-  translation -5.15 -9.067225962690018e-22 0.44992228660511463
-  rotation 0.9999999999999998 -2.0726484740315192e-08 1.497590077656157e-15 4.0040933829845995e-07
+  translation -5.15 -9.067225962690018e-22 0.4499204221098543
+  rotation 1 -1.7161659835518853e-08 5.263194207992979e-16 4.835824809291698e-07
   children [
     GPS {
     }
@@ -1363,8 +1421,8 @@ DEF BALL Robot {
   }
 }
 DEF BALL Robot {
-  translation 4.43 2.8 0.5298591200000001
-  rotation 0.9999999999999998 -2.072696477871989e-08 1.4977208687129695e-15 4.004000647814721e-07
+  translation 4.43 2.8 0.4499307070841435
+  rotation 1 -1.7163214102000612e-08 5.267428955746145e-16 4.835386886629425e-07
   children [
     GPS {
     }
@@ -1418,8 +1476,8 @@ DEF BALL Robot {
   }
 }
 DEF BALL Robot {
-  translation -8.12 -2.29 0.6298591200000001
-  rotation 0.9999999999999998 -2.072696477871989e-08 1.4977208687129695e-15 4.004000647814721e-07
+  translation -8.12 -2.29 0.4499120104701677
+  rotation 0.9999999999999996 -2.831245042663367e-08 2.7589519802153906e-15 4.83492512716165e-07
   children [
     GPS {
     }
@@ -1473,8 +1531,8 @@ DEF BALL Robot {
   }
 }
 DEF BALL Robot {
-  translation 7.09 -2.94 0.7298591200000001
-  rotation 0.9999999999999998 -2.072696477871989e-08 1.4977208687129695e-15 4.004000647814721e-07
+  translation 7.09 -2.94 0.44990962288685055
+  rotation 1 -1.159525826933036e-08 -5.877317077860117e-16 4.8344634520083e-07
   children [
     GPS {
     }
@@ -1528,8 +1586,8 @@ DEF BALL Robot {
   }
 }
 DEF BALL Robot {
-  translation -8.3 -4.25 0.8298591200000001
-  rotation 0.9999999999999998 -2.072696477871989e-08 1.4977208687129695e-15 4.004000647814721e-07
+  translation -8.3 -4.25 0.4499048109881652
+  rotation 1 -1.7168131784327757e-08 5.280827651792907e-16 4.834001826394799e-07
   children [
     GPS {
     }

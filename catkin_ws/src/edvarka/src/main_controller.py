@@ -43,6 +43,7 @@ class main_controller:
         self.is_object_detected_sub = rospy.Subscriber("/is_object_detected", Bool, callback=self.update_is_object_detected)
         self.object_dist_from_center_sub = rospy.Subscriber("/object_dist_from_center", Float64, callback=self.update_object_dist_from_center)
         self.object_size_sub = rospy.Subscriber("/object_size", Float64, callback=self.update_object_size)
+        self.object_y_pos_sub = rospy.Subscriber("/object_y_pos", Float64, callback=self.update_object_y_pos)
 
         self.init_time = rospy.Time.now()
         # create the Robot instance.
@@ -65,6 +66,12 @@ class main_controller:
         self.is_object_detected = False
         self.object_dist_from_center = None
         self.object_size = None
+        self.object_y_pos = None
+        self.object_collected_timer = 0
+        self.OBJECT_COLLECTED_TIMER_INIT = 1000/(self.timestep) * 4 # seconds
+        self.OBJECT_MEAN_Z_DIMENSION = 1 # TODO: edit
+        self.PIXEL_SQ_TO_CM_SQ = 1 # TODO: investigate + replace
+        self.OBJECT_Y_POS_NEAR_THRESH = 180 # image pixels
         
         # battery
         self.battery_level = 100
@@ -150,6 +157,17 @@ class main_controller:
     
     def update_object_size(self, size):
         self.object_size = size.data
+    
+    def update_object_y_pos(self, y_pos):
+        self.object_y_pos = y_pos.data
+        if self.object_y_pos is not None\
+           and self.object_y_pos > self.OBJECT_Y_POS_NEAR_THRESH\
+           and self.object_collected_timer <= 0\
+           and self.object_size is not None\
+           and self.object_dist_from_center < self.rm.OBJECT_FACING_THRESHOLD:
+            volume = self.PIXEL_SQ_TO_CM_SQ*self.OBJECT_MEAN_Z_DIMENSION * self.object_size
+            print("Collected object of volume: {}".format(volume))
+            self.object_collected_timer = self.OBJECT_COLLECTED_TIMER_INIT
     
     def update_robot_state(self, state):
         # state is of type Odometry
@@ -300,9 +318,11 @@ class main_controller:
 
     
     def main_loop(self):
-        # self.robot.step(self.timestep)
-        # self.send_sensor_readings_to_localization()
-        # return
+        self.robot.step(self.timestep)
+        self.send_sensor_readings_to_localization()
+        return
+        if self.object_collected_timer > 0:
+            self.object_collected_timer -= 1
         print("Iteration: ", self.itter)
         print("Position in path: ",self.path_pos)
         next_position = self.my_navsat_transform.longlat_to_xy(self.path[self.path_pos])
