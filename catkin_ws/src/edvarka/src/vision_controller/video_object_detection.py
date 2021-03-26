@@ -11,8 +11,8 @@ from std_msgs.msg import Float64, Bool
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 
-from object_detection_utils import *
-from camera_feedback_control import *
+from vision_utils_ver2 import *
+from remove_background import getBackground, getHorizon, removeBackground
 
 OBJECT_EXIST_RATE = 0.5
 timeout = 10
@@ -21,21 +21,31 @@ water_image = None
 bridge = CvBridge()
 object_center = None
 
+
 def image_object_detect(img_base,img_obj):
     global object_center
     # get segmentated image
     seg_img = segment_object(img_base,img_obj)
-    img_with_contour, main_obj_contour = get_main_object(seg_img)
+    #cv2.imshow("seg_image", seg_img); cv2.waitKey(1)
+    # get image with background
+    background = getBackground(img_base,img_obj)
+    # get horizontal line (y-coordinate)
+    horizon = getHorizon(background)
+    # remove anything upper horizontal line
+    seg_img2 = removeBackground(seg_img,horizon)
+    #cv2.imshow("seg_image2", seg_img2); cv2.waitKey(1)
+    # get main object
+    img_with_contour, main_obj_contour = get_main_object(seg_img2)
+    #cv2.imshow("obj_image", img_with_contour); cv2.waitKey(1)
     nearby_row = 180
     img_with_contour[nearby_row,:] = 255
-    cv2.imshow("obj_image", img_with_contour)
-    cv2.waitKey(1)
+    cv2.imshow("obj_image", img_with_contour); cv2,waitKey(1)
     # detect object exist or not
     obj_exist, object_size = object_exist(main_obj_contour)
     object_center = None
     if obj_exist:
         object_center = get_object_center(main_obj_contour)
-    return (obj_exist, object_center, object_size)
+    return (obj_exist, object_center, object_size, horizon)
 
 def update_front_image(img):
     global bridge, front_image
@@ -64,7 +74,7 @@ if __name__ == '__main__':
     
     while not rospy.is_shutdown():
         if front_image is not None and water_image is not None:
-            object_exists, object_center, object_size = image_object_detect(water_image, front_image)
+            object_exists, object_center, object_size, horizon = image_object_detect(water_image, front_image)
             if object_exists:
                 is_object_detected_pub.publish(True)
                 dist = get_Horizontal_gap(object_center)
