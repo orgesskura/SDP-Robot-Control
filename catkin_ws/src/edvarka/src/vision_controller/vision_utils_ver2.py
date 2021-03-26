@@ -12,8 +12,12 @@ OBJECT_THRESH = int((256*256) * 0.000005)
 
 # method to sbtract base image from object image
 def image_subtraction(img1,img2):
-    sub =  cv2.subtract(img1,img2)
+    img1 = np.array(img1, dtype=int)
+    img2 = np.array(img2, dtype=int)
+    sub = np.uint8(np.abs(img1-img2))
     sub -= np.min(sub)
+    # cv2.imshow("sub", sub)
+    # cv2.waitKey(1)
     return sub
 
 # method to segment image using threshold

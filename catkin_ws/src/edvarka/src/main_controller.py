@@ -318,9 +318,9 @@ class main_controller:
 
     
     def main_loop(self):
-        self.robot.step(self.timestep)
-        self.send_sensor_readings_to_localization()
-        return
+        # self.robot.step(self.timestep)
+        # self.send_sensor_readings_to_localization()
+        # return
         if self.object_collected_timer > 0:
             self.object_collected_timer -= 1
         print("Iteration: ", self.itter)

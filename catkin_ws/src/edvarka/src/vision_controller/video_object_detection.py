@@ -39,7 +39,7 @@ def image_object_detect(img_base,img_obj):
     #cv2.imshow("obj_image", img_with_contour); cv2.waitKey(1)
     nearby_row = 180
     img_with_contour[nearby_row,:] = 255
-    cv2.imshow("obj_image", img_with_contour); cv2,waitKey(1)
+    cv2.imshow("obj_image", img_with_contour); cv2.waitKey(1)
     # detect object exist or not
     obj_exist, object_size = object_exist(main_obj_contour)
     object_center = None
