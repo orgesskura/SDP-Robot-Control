@@ -48,7 +48,7 @@ def getHorizon(img):
     cv2.imshow("Edges",edges); cv2.waitKey(1)
     lines = cv2.HoughLinesP(edges,rho=1,theta=np.pi/360,threshold=80,minLineLength=50,maxLineGap=5)
     lines = [l[0] for l in lines]
-    print(lines)
+    #print(lines)
     idx = np.argmax([getEucLength(line) for line in lines])
     max_line = lines[idx]
     horizon = int((max_line[1] + max_line[3])/2)
@@ -60,7 +60,7 @@ def getHorizon2(img):
     cv2.imshow("Edges",edges); cv2.waitKey(1)
     lines = cv2.HoughLinesP(edges,rho=1,theta=np.pi/360,threshold=80,minLineLength=50,maxLineGap=5)
     lines = [l[0] for l in lines]
-    print(lines)
+    #print(lines)
     idx = np.argmax([getYcoordinate(line) for line in lines])
     max_line = lines[idx]
     horizon = int((max_line[1] + max_line[3])/2)
