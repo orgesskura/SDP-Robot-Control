@@ -38,18 +38,35 @@ def getEucLength(line):
     v2 = np.array([x2,y2])
     return np.linalg.norm(v1-v2)
 
+def getYcoordinate(line):
+    x1,y1,x2,y2 = line
+    return int((y1+y2)/2)
+
 def getHorizon(img):
     img = convertUnit8(img)
     edges = cv2.Canny(img, 150, 300, L2gradient=True)
     cv2.imshow("Edges",edges); cv2.waitKey(1)
-    lines = cv2.HoughLinesP(edges,1,np.pi/180,threshold=80,maxLineGap=10)[0]
+    lines = cv2.HoughLinesP(edges,rho=1,theta=np.pi/360,threshold=80,minLineLength=50,maxLineGap=5)
+    lines = [l[0] for l in lines]
+    print(lines)
     idx = np.argmax([getEucLength(line) for line in lines])
+    max_line = lines[idx]
+    horizon = int((max_line[1] + max_line[3])/2)
+    return horizon
+
+def getHorizon2(img):
+    img = convertUnit8(img)
+    edges = cv2.Canny(img, 150, 300, L2gradient=True)
+    cv2.imshow("Edges",edges); cv2.waitKey(1)
+    lines = cv2.HoughLinesP(edges,rho=1,theta=np.pi/360,threshold=80,minLineLength=50,maxLineGap=5)
+    lines = [l[0] for l in lines]
+    print(lines)
+    idx = np.argmax([getYcoordinate(line) for line in lines])
     max_line = lines[idx]
     horizon = int((max_line[1] + max_line[3])/2)
     return horizon
 
 def removeBackground(img,h):
     img_copy = img.copy()
-    # remove 5 more pixel from horizon for robustness 
     img_copy[:h+5] = 0
     return img_copy
