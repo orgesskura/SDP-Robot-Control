@@ -12,7 +12,7 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 
 from vision_utils_ver2 import *
-from remove_background import getBackground, getHorizon, removeBackground
+from remove_background import getBackground, getHorizon, getHorizon2, removeBackground
 
 OBJECT_EXIST_RATE = 0.5
 timeout = 10
@@ -30,7 +30,7 @@ def image_object_detect(img_base,img_obj):
     # get image with background
     background = getBackground(img_base,img_obj)
     # get horizontal line (y-coordinate)
-    horizon = getHorizon(background)
+    horizon = getHorizon2(background)
     # remove anything upper horizontal line
     seg_img2 = removeBackground(seg_img,horizon)
     #cv2.imshow("seg_image2", seg_img2); cv2.waitKey(1)
