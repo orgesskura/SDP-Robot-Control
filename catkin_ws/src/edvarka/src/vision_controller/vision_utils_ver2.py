@@ -24,7 +24,7 @@ def image_subtraction(img1,img2):
 def binarization(img):
     cv2.imshow("view", img)
     cv2.waitKey(1)
-    t = 50
+    t = 70
     red = img[:,:,2] < t
     green = img[:,:,1] < t
     blue = img[:,:,0] < t

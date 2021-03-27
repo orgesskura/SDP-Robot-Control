@@ -33,7 +33,7 @@ def image_object_detect(img_base,img_obj):
     horizon = getHorizon2(background)
     # remove anything upper horizontal line
     seg_img2 = removeBackground(seg_img,horizon)
-    #cv2.imshow("seg_image2", seg_img2); cv2.waitKey(1)
+    cv2.imshow("seg_image2", seg_img2); cv2.waitKey(1)
     # get main object
     img_with_contour, main_obj_contour = get_main_object(seg_img2)
     #cv2.imshow("obj_image", img_with_contour); cv2.waitKey(1)

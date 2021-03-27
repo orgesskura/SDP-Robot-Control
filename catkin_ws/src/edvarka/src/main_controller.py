@@ -69,8 +69,7 @@ class main_controller:
         self.object_y_pos = None
         self.object_collected_timer = 0
         self.OBJECT_COLLECTED_TIMER_INIT = 1000/(self.timestep) * 4 # seconds
-        self.OBJECT_MEAN_Z_DIMENSION = 1 # TODO: edit
-        self.PIXEL_SQ_TO_CM_SQ = 1 # TODO: investigate + replace
+        self.CM3_PER_PIXEL = 0.096154 # estimate
         self.OBJECT_Y_POS_NEAR_THRESH = 180 # image pixels
         
         # battery
@@ -128,6 +127,9 @@ class main_controller:
         self.etc_timer = 0
         self.ETC_TIMER_INIT = 35
 
+        # printing
+        self.prev_print = ""
+
     
     def communicate_with_server(self):
         while True:
@@ -163,11 +165,17 @@ class main_controller:
         if self.object_y_pos is not None\
            and self.object_y_pos > self.OBJECT_Y_POS_NEAR_THRESH\
            and self.object_collected_timer <= 0\
-           and self.object_size is not None\
-           and self.object_dist_from_center < self.rm.OBJECT_FACING_THRESHOLD:
-            volume = self.PIXEL_SQ_TO_CM_SQ*self.OBJECT_MEAN_Z_DIMENSION * self.object_size
+           and self.object_size is not None:
+            volume = self.CM3_PER_PIXEL*self.object_size
             print("Collected object of volume: {}".format(volume))
             self.object_collected_timer = self.OBJECT_COLLECTED_TIMER_INIT
+            # register collected trash position
+            gps_reading = self.hi.get_gps_values() # improve on
+            position = utils.longlat_position(
+                gps_reading[1],
+                gps_reading[0]
+            )
+            self.trashFound.append(position)
     
     def update_robot_state(self, state):
         # state is of type Odometry
@@ -316,6 +324,10 @@ class main_controller:
                 self.water_image_pub.publish(img_water_msg)
             self.image_read_rate.sleep()
 
+    def print_once(self, to_print):
+        if to_print != self.prev_print:
+            self.prev_print = to_print
+            print(to_print)
     
     def main_loop(self):
         # self.robot.step(self.timestep)
@@ -323,38 +335,33 @@ class main_controller:
         # return
         if self.object_collected_timer > 0:
             self.object_collected_timer -= 1
-        print("Iteration: ", self.itter)
-        print("Position in path: ",self.path_pos)
         next_position = self.my_navsat_transform.longlat_to_xy(self.path[self.path_pos])
         if self.is_object_detected:
             self.is_etc = False
-            print("Collecting trash...")
+            self.print_once("Collecting trash...")
             self.is_collecting_trash = True
             if self.rm.is_scanning:
                 self.rm.is_scanning = False
             self.rm.goto_object(self.object_dist_from_center, self.object_size)
-            self.rm.open_arms()
+            if self.object_y_pos is not None and self.object_y_pos > 256/3:
+                self.rm.open_arms()
+            else:
+                self.rm.close_arms()
         else:
             if self.is_collecting_trash:
                 # Has collected trash
-                gps_reading = self.hi.get_gps_values() # improve on
-                position = utils.longlat_position(
-                    gps_reading[1],
-                    gps_reading[0]
-                )
-                self.trashFound.append(position)
                 self.is_collecting_trash = False
                 self.is_etc = True
                 self.etc_timer = self.ETC_TIMER_INIT
             if self.is_etc:
                 self.rm.open_arms()
                 if self.etc_timer <= 0:
-                    print("finished etc")
+                    self.print_once("finished etc")
                     self.is_etc = False
                     self.hi.set_left_propeller_velocity(0)
                     self.hi.set_right_propeller_velocity(0)
                 else:
-                    print("etc-ing")
+                    self.print_once("etc-ing")
                     self.etc_timer -= 1
                     self.hi.set_left_propeller_velocity(self.rm.APPROACH_TRASH_VELOCITY)
                     self.hi.set_right_propeller_velocity(self.rm.APPROACH_TRASH_VELOCITY)
@@ -362,13 +369,15 @@ class main_controller:
                 self.rm.close_arms()
                 if self.rm.is_at(next_position) or self.rm.is_scanning:
                     if self.rm.scan():
-                        print("Scanning...")
+                        self.print_once("Scanning...")
                     else:
-                        print("Next step in the path...")
+                        self.print_once("Next step in the path...")
                         self.path_pos += 1
+                        self.print_once("Position in path: {}".format(self.path_pos))
                         if self.path_pos >= len(self.path):
                             self.path_pos = 0
                             self.itter+=1 # Update the itteration
+                            self.print_once("Iteration: {}".format(self.itter))
                             update = centroidUpdate.centroidUpdate(self.lochEdge, self.lochName, self.numberOfStops, self.itter, self.trashFound) # Updates the centroids to visit for the next journey
                             self.path = [self.startingPos]
                             for pt in update.centroidList: # Makes list of xy_positions
@@ -377,7 +386,7 @@ class main_controller:
                             # Set back to empty list for next round of finding trash
                             self.trashFound = []
                 else:
-                    print("moving towards next position: ",next_position)
+                    self.print_once("moving towards next position: {}".format(next_position))
                     self.rm.goto_xy(next_position)
 
         # rubbish_pos = utils.xy_position(3,3)

@@ -18,8 +18,8 @@ class robot_movement:
         self.ARMS_OPEN = 0
         self.ARMS_CLOSED = 1.5
         self.OBJECT_FACING_THRESHOLD = 40
-        self.APPROACH_TRASH_VELOCITY = 0.9
-        self.SMALL_OBJ_THRESH = (256*256*0.0000001) # 1/1000th of the image
+        self.APPROACH_TRASH_VELOCITY = 1.1
+        self.SMALL_OBJ_THRESH = (256*256*0.0001) # 1/10000th of the image
         # PΙD controller for facing
         self.INCLUDE_I_TERM_THRESHOLD_F = math.radians(40)
         self.last_f_error = 0
@@ -33,10 +33,10 @@ class robot_movement:
         self.t_Kd = 300
         self.t_Ki = 0.1
         # PID controller for facing (using vision)
-        self.INCLUDE_I_TERM_THRESHOLD_V = 60
+        self.INCLUDE_I_TERM_THRESHOLD_V = 40
         self.last_v_error = 0
         self.v_Kp = 0.01
-        self.v_Kd = 20
+        self.v_Kd = 10
         self.v_Ki = 0.001
         # Timer for stable facing
         self.TIMER_DURATION = 5 # steps
@@ -133,10 +133,10 @@ class robot_movement:
         if abs(error) < self.INCLUDE_I_TERM_THRESHOLD_F:
             include_i_term = 1
         rotation_velocity = (self.f_Kp*error + self.f_Kd*error_derivative + include_i_term*self.f_Ki*error_integral)
-        print("error:", error)
-        print("error_d:", error_derivative)
-        print("error_i:", error_integral)
-        print("rot_v:", rotation_velocity)
+        # print("error:", error)
+        # print("error_d:", error_derivative)
+        # print("error_i:", error_integral)
+        # print("rot_v:", rotation_velocity)
         rotation_velocity = self.cap_propeller_facing_velocity(rotation_velocity)
         self.hi.set_left_propeller_velocity(-rotation_velocity)
         self.hi.set_right_propeller_velocity(rotation_velocity)
@@ -151,7 +151,7 @@ class robot_movement:
             return
         error = object_pos_in_image
         error_derivative = (error - self.last_v_error) / self.hi.timestep
-        print("Derv: ", error_derivative)
+        # print("Derv: ", error_derivative)
         self.last_v_error = error
         error_integral = error * self.hi.timestep
         include_i_term = 0

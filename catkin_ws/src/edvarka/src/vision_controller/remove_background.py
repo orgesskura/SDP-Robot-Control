@@ -3,6 +3,7 @@ import cv2
 
 # high parameters
 IMG_SIZE = (256,256)
+last_horizon = 0
 
 ################################################################################################
 # background segmentation functions
@@ -59,11 +60,15 @@ def getHorizon2(img):
     edges = cv2.Canny(img, 150, 300, L2gradient=True)
     cv2.imshow("Edges",edges); cv2.waitKey(1)
     lines = cv2.HoughLinesP(edges,rho=1,theta=np.pi/360,threshold=80,minLineLength=50,maxLineGap=5)
+    global last_horizon
+    if lines is None:
+        return last_horizon
     lines = [l[0] for l in lines]
     #print(lines)
     idx = np.argmax([getYcoordinate(line) for line in lines])
     max_line = lines[idx]
-    horizon = int((max_line[1] + max_line[3])/2)
+    horizon = max(max_line[1], max_line[3])
+    last_horizon = horizon
     return horizon
 
 def removeBackground(img,h):

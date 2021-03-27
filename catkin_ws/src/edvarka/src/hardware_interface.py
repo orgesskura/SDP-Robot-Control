@@ -107,7 +107,7 @@ class hardware_interface:
         self.set_propeller_position(self.left_propeller, p)
 
     def set_left_propeller_velocity(self, v):
-        print("Left v: {}".format(v))
+        # print("Left v: {}".format(v))
         self.set_propeller_velocity(self.left_propeller, v)
 
     def set_left_propeller_acceleration(self, a):
@@ -117,7 +117,7 @@ class hardware_interface:
         self.set_propeller_position(self.right_propeller, p)
 
     def set_right_propeller_velocity(self, v):
-        print("Right v: {}".format(v))
+        # print("Right v: {}".format(v))
         self.set_propeller_velocity(self.right_propeller, v)
 
     def set_right_propeller_acceleration(self, a):
