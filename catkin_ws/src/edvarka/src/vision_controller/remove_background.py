@@ -3,7 +3,7 @@ import cv2
 
 # high parameters
 IMG_SIZE = (256,256)
-last_horizon = 0
+last_horizon = 255
 
 ################################################################################################
 # background segmentation functions
@@ -59,7 +59,8 @@ def getHorizon2(img):
     img = convertUnit8(img)
     edges = cv2.Canny(img, 150, 300, L2gradient=True)
     cv2.imshow("Edges",edges); cv2.waitKey(1)
-    lines = cv2.HoughLinesP(edges,rho=1,theta=np.pi/360,threshold=80,minLineLength=50,maxLineGap=5)
+    #lines = cv2.HoughLinesP(edges,rho=1,theta=np.pi/360,threshold=80,minLineLength=50,maxLineGap=5)
+    lines = cv2.HoughLinesP(edges, cv2.HOUGH_PROBABILISTIC, np.pi/180, 30, 50, 5)
     global last_horizon
     if lines is None:
         return last_horizon

@@ -24,7 +24,7 @@ class robot_movement:
         self.INCLUDE_I_TERM_THRESHOLD_F = math.radians(40)
         self.last_f_error = 0
         self.f_Kp = 1
-        self.f_Kd = 200
+        self.f_Kd = 50
         self.f_Ki = 0.1
         # PID controller for travelling
         self.INCLUDE_I_TERM_THRESHOLD_T = 0.4
@@ -36,7 +36,7 @@ class robot_movement:
         self.INCLUDE_I_TERM_THRESHOLD_V = 40
         self.last_v_error = 0
         self.v_Kp = 0.01
-        self.v_Kd = 10
+        self.v_Kd = 3
         self.v_Ki = 0.001
         # Timer for stable facing
         self.TIMER_DURATION = 5 # steps

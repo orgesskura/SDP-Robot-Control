@@ -71,6 +71,10 @@ class main_controller:
         self.OBJECT_COLLECTED_TIMER_INIT = 1000/(self.timestep) * 4 # seconds
         self.CM3_PER_PIXEL = 0.096154 # estimate
         self.OBJECT_Y_POS_NEAR_THRESH = 180 # image pixels
+
+        # capacity stuff
+        self.BASKET_CAPACITY = 9000 # cm^3
+        self.current_trash_volume = 0
         
         # battery
         self.battery_level = 100
@@ -130,6 +134,7 @@ class main_controller:
         # printing
         self.prev_print = ""
 
+
     
     def communicate_with_server(self):
         while True:
@@ -139,7 +144,8 @@ class main_controller:
             battery = self.battery_level
             if long_lat_pos is None or battery is None:
                 continue
-            updateDatabase(long_lat_pos, battery)
+            fullness = self.current_trash_volume / self.BASKET_CAPACITY * 100
+            updateDatabase(long_lat_pos, battery, fullness)
             if self.autonomous_mode == False:
                 longlat_targ = getTargetCoordinatesFromDatabase()
                 if self.my_navsat_transform.origin is not None:
@@ -166,8 +172,12 @@ class main_controller:
            and self.object_y_pos > self.OBJECT_Y_POS_NEAR_THRESH\
            and self.object_collected_timer <= 0\
            and self.object_size is not None:
+            # register collected trash
             volume = self.CM3_PER_PIXEL*self.object_size
             print("Collected object of volume: {}".format(volume))
+            self.current_trash_volume += volume
+            fullness = self.current_trash_volume / self.BASKET_CAPACITY * 100
+            self.print_once("Fullness: {}".format(fullness))
             self.object_collected_timer = self.OBJECT_COLLECTED_TIMER_INIT
             # register collected trash position
             gps_reading = self.hi.get_gps_values() # improve on

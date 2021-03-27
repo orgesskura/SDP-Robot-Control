@@ -7,7 +7,7 @@ import utils
 
 offset = utils.longlat_position(-3.161150, 55.952237)
 
-def updateDatabase(long_lat_pos, battery):
+def updateDatabase(long_lat_pos, battery, fullness):
 	global offset
 	# Connect to database
 
@@ -31,11 +31,11 @@ def updateDatabase(long_lat_pos, battery):
 	longitude = long_lat_pos.longitude + offset.longitude
 	
 	# Update the database
-	print("data: ",latitude, longitude)
 	try:
 		db.child("Test").update({"Battery": battery})
 		db.child("Test").child("Location").update({"Latitude": latitude})
 		db.child("Test").child("Location").update({"Longitude": longitude})
+		db.child("Test").update({"Fullness": fullness})
 	except Exception as e:
 		print(e)
 		
